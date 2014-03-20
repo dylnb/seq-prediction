@@ -14,7 +14,16 @@ function makeDrawer() {
   return drawer;
 }
 
-function makeButtons(drawer, syls, callback) {
+function makeNotificationWindow() {
+  var notes = d3.select(".container")
+               .append("div")
+               .attr("class", "note-window");
+  return notes;
+}
+
+function makeButtons(drawer, syls, conceal_num, callback) {
+  var clicks = 0;
+  var guess = [];
   drawer.selectAll("button")
         .data(syls)
         .enter()
@@ -24,7 +33,12 @@ function makeButtons(drawer, syls, callback) {
         .text(function(d) { return d; })
         .on("click",
             function(d) {
-              console.log("clicked " + d); callback();
+              guess.push(d);
+              if (clicks < conceal_num - 1) {
+                clicks++;
+              } else {
+                console.log.apply(console, guess); callback(guess);
+              }
             });
 
 }
@@ -37,12 +51,20 @@ function clearDrawer(drawer) {
   drawer.selectAll("button").remove();
 }
 
-function drawSequence(stage, sequence, drawer, stim_array, callback) {
+function clearNotes(notes) {
+  notes.selectAll("p").remove();
+}
+
+function drawSequence(stage, drawer, notes, sequence,
+                      conceal_num, stim_array, callback) {
   var interval = setInterval(function() {
-    if (sequence.length == 0) {
+    if (sequence.length == conceal_num) {
       clearInterval(interval);
-      callback(drawer, syl_choices,
-               function() { doTrial(stage, drawer, stim_array); })
+      callback(drawer, syl_choices, conceal_num,
+               function(guess) {
+                 checkGuess(notes, sequence, guess);
+                 doTrial(stage, drawer, notes, stim_array);
+               });
     }
     else {
       var syl = sequence.shift();
@@ -61,20 +83,42 @@ function drawSyl(stage, syl) {
        .text(syl.text);
 }
 
+function checkGuess(notes, correct, guess) {
+  var equal = function (correct, guess) {
+    if (correct.length !== guess.length) { return false; }
+    else if (correct == []) { return true; }
+    else {
+      var report = (correct[0] === guess[0]) &&
+                   equal(correct.slice(1, correct.length),
+                         guess.slice(1, guess.length));
+      return report;
+    }
+  }
+  var color = equal(correct, guess) ? "green" : "red";
+  console.log(color);
+  notes.selectAll("p")
+       .data(correct.map(function (syl) { return syl.text; }))
+       .enter()
+       .append("p")
+       .style("color", color)
+       .text(function(d) { return d; });
+}
+
 var syl_choices = [
   "ba", "pa", "gu", "bo"
 ];
-var reveal_number = 3;
+var conceal_number = 3;
 var mystage  = makeStage();
 var mydrawer = makeDrawer();
+var mynotes = makeNotificationWindow();
 
-function doTrial(stage, drawer, stim_array) {
+function doTrial(stage, drawer, notes, stim_array) {
   if (stim_array.length > 0) {
     var sequence = stim_array.shift();
     clearStage(stage);
     clearDrawer(drawer);
-    drawSequence(stage, sequence.slice(0, reveal_number),
-                 drawer, stim_array, makeButtons);
+    drawSequence(stage, drawer, notes, sequence,
+                 conceal_number, stim_array, makeButtons);
   } else {
     d3.select(".container").append("center").text("That'll do. Thanks.");
   }
@@ -108,7 +152,7 @@ var trials = [
   ]
 ];
 
-doTrial(mystage, mydrawer, trials); 
+doTrial(mystage, mydrawer, mynotes, trials); 
 
 
 // var trials = [
