@@ -1,0 +1,90 @@
+div.stim {
+  width: 100%;
+  height: 100%;
+  display: table;
+}
+
+.stim p {
+  width: 100%;
+  height: 100%;
+  display: table-cell; 
+  vertical-align: middle; 
+  text-align: center;
+  font-size: 48px;
+}
+
+.stage {
+  height: 200px;
+  min-height: 200px;
+  width: 100%;
+  margin-bottom: 2em;
+  position: relative;
+}
+
+.absoluteContainer {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
+.syl-drawer {
+  text-align: center;
+}
+
+.note-window {
+  margin-top: 2em;
+  text-align: center;
+  font-size: 18px;
+}
+
+.note-window p {
+  display: inline-block;
+  margin: 0 0.5em;
+}
+
+.bubble 
+{
+position: relative;
+width: 175px;
+height: 140px;
+padding: 0px;
+background: #FFFFFF;
+-webkit-border-radius: 40px;
+-moz-border-radius: 40px;
+border-radius: 40px;
+border: #7F7F7F solid 6px;
+}
+
+.bubble:after 
+{
+content: '';
+position: absolute;
+border-style: solid;
+border-width: 14px 0 14px 19px;
+border-color: transparent #FFFFFF;
+display: block;
+width: 0;
+z-index: 1;
+right: -19px;
+top: 56px;
+}
+
+.bubble:before 
+{
+content: '';
+position: absolute;
+border-style: solid;
+border-width: 19px 0 19px 24px;
+border-color: transparent #7F7F7F;
+display: block;
+width: 0;
+z-index: 0;
+right: -30px;
+top: 51px;
+}
+CSS
+
+
+
+
+

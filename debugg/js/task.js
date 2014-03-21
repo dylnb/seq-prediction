@@ -1,3 +1,31 @@
+// Stimuli...
+var trials = [
+  [
+    {index: 1, text: "pa"},
+    {index: 2, text: "bo"},
+    {index: 3, text: "gu"},
+    {index: 4, text: "pa"},
+    {index: 5, text: "bo"},
+    {index: 6, text: "gu"}
+  ],
+  [
+    {index: 1, text: "go"},
+    {index: 2, text: "bu"},
+    {index: 3, text: "pa"},
+    {index: 4, text: "pa"},
+    {index: 5, text: "bo"},
+    {index: 6, text: "gu"}
+  ],
+  [
+    {index: 1, text: "ge"},
+    {index: 2, text: "pu"},
+    {index: 3, text: "pa"},
+    {index: 4, text: "pa"},
+    {index: 5, text: "bo"},
+    {index: 6, text: "gu"}
+  ]
+];
+
 function makeStage() {
   var stage = d3.select(".container")
                 .append("div")
@@ -37,7 +65,10 @@ function makeButtons(drawer, syls, conceal_num, callback) {
               if (clicks < conceal_num - 1) {
                 clicks++;
               } else {
-                console.log.apply(console, guess); callback(guess);
+                console.log.apply(console, guess);
+                // psiTurk.recordTrialData(guess);
+                console.log.apply(console, guess);
+                callback(guess);
               }
             });
 
@@ -104,14 +135,6 @@ function checkGuess(notes, correct, guess) {
        .text(function(d) { return d; });
 }
 
-var syl_choices = [
-  "ba", "pa", "gu", "bo"
-];
-var conceal_number = 3;
-var mystage  = makeStage();
-var mydrawer = makeDrawer();
-var mynotes = makeNotificationWindow();
-
 function doTrial(stage, drawer, notes, stim_array) {
   if (stim_array.length > 0) {
     var sequence = stim_array.shift();
@@ -124,35 +147,14 @@ function doTrial(stage, drawer, notes, stim_array) {
   }
 }
 
-// Stimuli...
-var trials = [
-  [
-    {index: 1, text: "pa"},
-    {index: 2, text: "bo"},
-    {index: 3, text: "gu"},
-    {index: 4, text: "pa"},
-    {index: 5, text: "bo"},
-    {index: 6, text: "gu"}
-  ],
-  [
-    {index: 1, text: "go"},
-    {index: 2, text: "bu"},
-    {index: 3, text: "pa"},
-    {index: 4, text: "pa"},
-    {index: 5, text: "bo"},
-    {index: 6, text: "gu"}
-  ],
-  [
-    {index: 1, text: "ge"},
-    {index: 2, text: "pu"},
-    {index: 3, text: "pa"},
-    {index: 4, text: "pa"},
-    {index: 5, text: "bo"},
-    {index: 6, text: "gu"}
-  ]
-];
+var syl_choices = ["ba", "pa", "gu", "bo"];
+var conceal_number = 3;
+var mystage  = makeStage();
+var mydrawer = makeDrawer();
+var mynotes = makeNotificationWindow();
 
 doTrial(mystage, mydrawer, mynotes, trials); 
+
 
 
 // var trials = [
