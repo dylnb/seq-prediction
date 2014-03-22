@@ -181,8 +181,6 @@ function checkGuess(elephant, correct, guess, callback) {
       return report;
     }
   }
-  var color = equal(correct, guess) ? "green" : "red";
-  console.log(color);
   if (!equal(correct, guess)) {
     elephant.transition().duration(300).attr("y", 25)
             .transition().duration(300).attr("y", 50)
@@ -215,7 +213,6 @@ var mystage        = makeStage();
 var myelephant     = makeElephant(mystage);
 var mycow          = makeCow(mystage);
 var mystimbubble   = makeStimBubble(mystage);
-// var rbubble     = makeRespBubble(mystage);
 var mydrawer       = makeDrawer();
 var mynotes        = makeNotificationWindow();
 
