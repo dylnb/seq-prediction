@@ -1,30 +1,31 @@
 // Stimuli...
-var trials = [
-  [
-    {index: 1, text: "pa"},
-    {index: 2, text: "bo"},
-    {index: 3, text: "gu"},
-    {index: 4, text: "pa"},
-    {index: 5, text: "bo"},
-    {index: 6, text: "gu"}
-  ],
-  [
-    {index: 1, text: "go"},
-    {index: 2, text: "bu"},
-    {index: 3, text: "pa"},
-    {index: 4, text: "pa"},
-    {index: 5, text: "bo"},
-    {index: 6, text: "gu"}
-  ],
-  [
-    {index: 1, text: "ge"},
-    {index: 2, text: "pu"},
-    {index: 3, text: "pa"},
-    {index: 4, text: "pa"},
-    {index: 5, text: "bo"},
-    {index: 6, text: "gu"}
-  ]
-];
+// var trials = [
+//   [
+//     {index: 1, text: "pa"},
+//     {index: 2, text: "bo"},
+//     {index: 3, text: "gu"},
+//     {index: 4, text: "pa"},
+//     {index: 5, text: "bo"},
+//     {index: 6, text: "gu"}
+//   ],
+//   [
+//     {index: 1, text: "go"},
+//     {index: 2, text: "bu"},
+//     {index: 3, text: "pa"},
+//     {index: 4, text: "pa"},
+//     {index: 5, text: "bo"},
+//     {index: 6, text: "gu"}
+//   ],
+//   [
+//     {index: 1, text: "ge"},
+//     {index: 2, text: "pu"},
+//     {index: 3, text: "pa"},
+//     {index: 4, text: "pa"},
+//     {index: 5, text: "bo"},
+//     {index: 6, text: "gu"}
+//   ]
+// ];
+
 
 function makeStage() {
   var stage = d3.select(".container")
@@ -144,25 +145,42 @@ function drawSequence(stage, sbubble, drawer, elephant, sequence,
                  checkGuess(elephant, sequence, guess, function() {
                    var suffix = setInterval(function() {
                      clearBubble(sbubble);
-                     if (sequence.length == 0) {
+                     if (_.isEmpty(sequence)) {
                        clearInterval(suffix);
                        doTrial(stage, sbubble, drawer, elephant, stim_array);
                      } else {
                        var syl = sequence.shift();
                        drawSyl(sbubble, syl);
                      }
-                   }, 1000);
+                   }, 250);
                    return suffix;
                  });
                });
     }
     else {
+      console.log("drawSeq: ");
+      console.log(sequence);
       var syl = sequence.shift();
       drawSyl(sbubble, syl);
     }
-  }, 1000);
+  }, 250);
   return prefix;
 }
+
+function drawExpSequence(stage, sbubble, drawer, elephant, sequence, stim_array) {
+  var fix = setInterval(function() {
+    clearBubble(sbubble);
+    if (_.isEmpty(sequence)) {
+      clearInterval(fix);
+      doTrial(stage, sbubble, drawer, elephant, stim_array);
+    } else {
+      var syl = sequence.shift();
+      drawSyl(sbubble, syl);
+    }
+  }, 250);
+  return fix;
+}
+
 
 function drawSyl(bubble, syl) {
   bubble.append("div")
@@ -195,11 +213,15 @@ function doTrial(stage, sbubble, drawer, elephant, stim_array) {
     var sequence = stim_array.shift();
     clearBubble(sbubble);
     clearDrawer(drawer);
-    drawSyl(sbubble, {index: 0, text: "+"});
+    drawSyl(sbubble, {index: 0, text: " "});
     setTimeout(function() {
-      drawSequence(stage, sbubble, drawer, elephant, sequence,
-                   conceal_number, stim_array, interrupt);
-    }, 2000);
+      if (sequence.length <= conceal_number) {
+        drawExpSequence(stage, sbubble, drawer, elephant, sequence, stim_array);
+      } else {
+        drawSequence(stage, sbubble, drawer, elephant, sequence,
+                     conceal_number, stim_array, interrupt);
+      }
+    }, 500);
   } else {
     d3.select(".container").append("center").text("That'll do. Thanks.");
   }
@@ -216,48 +238,18 @@ var mystimbubble   = makeStimBubble(mystage);
 var mydrawer       = makeDrawer();
 var mynotes        = makeNotificationWindow();
 
+var syl_code = ["wao", "yai", "piu", "shin", "bam", "fei", "ti", "ra", "ki"];
+var trials = [];
 
-setTimeout(function() {
-  doTrial(mystage, mystimbubble, mydrawer, myelephant, trials);
-}, 2000);
+queue()
+  .defer(d3.csv, "data/stims2.csv", function(d) {
+    var codes = d.Sequence.split(" ");
+    var syls = _.map(codes, function(code) { return {text: syl_code[+code - 1]}; });
+    trials.push(syls);
+  }, function(error, rows) {
+    console.log("error");
+  })
+  .await(setTimeout(function() {
+    doTrial(mystage, mystimbubble, mydrawer, myelephant, trials);
+  }, 2000));
 
-
-
-// var trials = [
-//   {
-//     reveal:  [
-//                {index: 1, text: "pa"},
-//                {index: 2, text: "bo"},
-//                {index: 3, text: "gu"},
-//              ],
-//     conceal: [
-//                {index: 4, text: "pa"},
-//                {index: 5, text: "bo"},
-//                {index: 6, text: "gu"}
-//              ]
-//   }
-//   {
-//     reveal:  [
-//                {index: 1, text: "go"},
-//                {index: 2, text: "bu"},
-//                {index: 3, text: "pa"},
-//              ],
-//     conceal: [
-//                {index: 4, text: "pa"},
-//                {index: 5, text: "bo"},
-//                {index: 6, text: "gu"}
-//              ]
-//   }
-//   {
-//     reveal:  [
-//                {index: 1, text: "ge"},
-//                {index: 2, text: "pu"},
-//                {index: 3, text: "pa"},
-//              ],
-//     conceal: [
-//                {index: 4, text: "pa"},
-//                {index: 5, text: "bo"},
-//                {index: 6, text: "gu"}
-//              ]
-//   }
-// ];
