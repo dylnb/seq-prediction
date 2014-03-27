@@ -201,7 +201,7 @@ var TestPhase = function() {
   function checkGuess(elephant, correct, guess, callback) {
     var equal = function (correct, guess) {
       if (correct.length !== guess.length) { return false; }
-      else if (correct == []) { return true; }
+      else if (_.isEmpty(correct)) { return true; }
       else {
         var report = (correct[0] === guess[0]) &&
                      equal(correct.slice(1, correct.length),
@@ -209,11 +209,22 @@ var TestPhase = function() {
         return report;
       }
     }
+    console.log("correct: " + correct);
+    console.log("guess: " + guess);
     if (!equal(correct, guess)) {
       elephant.transition().duration(300).attr("y", 25)
               .transition().duration(300).attr("y", 50)
               .transition().duration(300).attr("y", 25)
               .transition().duration(300).attr("y", 50);
+    } else {
+      var lefteye = elephant.select("path#3163");
+      var totalLength = lefteye.node().getTotalLength();
+      lefteye.attr("stroke-dasharray", totalLength + " " + totalLength)
+             .attr("stroke-dashoffset", totalLength)
+             .transition()
+             .duration(2000)
+             .ease("linear")
+             .attr("stroke-dashoffset", 0);
     }
     callback();
   }
@@ -253,6 +264,7 @@ var TestPhase = function() {
     {text: "ba"}, {text: "pa"}, {text: "gu"}, {text: "bo"}
   ];
   var conceal_number = 3;
+  if (condition == 1) { conceal_number = 1; }
   var mystage        = makeStage();
   var myelephant     = makeElephant(mystage);
   var mycow          = makeCow(mystage);
@@ -273,7 +285,6 @@ $(window).load( function(){
     psiTurk.doInstructions(
     	instructionPages, // a list of pages you want to display in sequence
     	function() {
-        console.log("something");
         currentview = new TestPhase();
       } // what you want to do when you are done with instructions
     );

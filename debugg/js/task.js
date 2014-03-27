@@ -48,20 +48,41 @@ function makeCow(stage) {
   return cow;
 }
 
+//function makeElephant(stage) {
+//  var elephant = stage.append("div")
+//                      .attr("class", "elephant")
+//                      .append("svg")
+//                      .attr("width", 200)
+//                      .attr("height", 200)
+//                      .append("image")
+//                      .attr("xlink:href", "images/elephant.svg")
+//                      .attr("width", 150)
+//                      .attr("height", 150)
+//                      .attr("x", 50)
+//                      .attr("y", 50);
+//  return elephant;
+//}
+
 function makeElephant(stage) {
-  var elephant = stage.append("div")
-                      .attr("class", "elephant")
-                      .append("svg")
-                      .attr("width", 200)
-                      .attr("height", 200)
-                      .append("image")
-                      .attr("xlink:href", "images/elephant.svg")
-                      .attr("width", 150)
-                      .attr("height", 150)
-                      .attr("x", 50)
-                      .attr("y", 50);
-  return elephant;
+  var e = stage.append("div")
+               .attr("class", "elephant")
+               .append("div")
+               .attr("width", 200)
+               .attr("height", 200);
+  
+  d3.xml("images/elephant.svg", function(error, svgtext) {
+    if (error) {console.log(error); return;}
+    e.html(svgtext)
+    var svg = e.select("svg");
+    svg.attr("width", 150)
+       .attr("height", 150)
+       .attr("x", 50)
+       .attr("y", 50);
+  });
+  
+  return e.select("div").select("svg");
 }
+       
 
 function makeStimBubble(stage) {
   var sbubble = stage.append("div")
@@ -190,22 +211,34 @@ function drawSyl(bubble, syl) {
 
 function checkGuess(elephant, correct, guess, callback) {
   var equal = function (correct, guess) {
-    if (correct.length !== guess.length) { return false; }
-    else if (correct == []) { return true; }
+    var cor_strings = _.pluck(correct, "text");
+    if (cor_strings.length !== guess.length) { return false; }
+    else if (_.isEmpty(correct)) { return true; }
     else {
-      var report = (correct[0] === guess[0]) &&
+      var report = (cor_strings[0] === guess[0]) &&
                    equal(correct.slice(1, correct.length),
                          guess.slice(1, guess.length));
       return report;
     }
   }
+  console.log("correct: " + correct);
+  console.log("guess: " + guess);
   if (!equal(correct, guess)) {
     elephant.transition().duration(300).attr("y", 25)
             .transition().duration(300).attr("y", 50)
             .transition().duration(300).attr("y", 25)
             .transition().duration(300).attr("y", 50);
-  }
+  } else {
+    var lefteye = d3.select("#3163");
+    var totalLength = lefteye.node().getTotalLength();
+    lefteye.attr("stroke-dasharray", totalLength + " " + totalLength)
+           .attr("stroke-dashoffset", totalLength)
+           .transition()
+           .duration(2000)
+           .ease("linear")
+           .attr("stroke-dashoffset", 0);
   callback();
+  }
 }
 
 function doTrial(stage, sbubble, drawer, elephant, stim_array) {
