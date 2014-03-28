@@ -216,15 +216,6 @@ var TestPhase = function() {
               .transition().duration(300).attr("y", 50)
               .transition().duration(300).attr("y", 25)
               .transition().duration(300).attr("y", 50);
-    } else {
-      var lefteye = elephant.select("path#3163");
-      var totalLength = lefteye.node().getTotalLength();
-      lefteye.attr("stroke-dasharray", totalLength + " " + totalLength)
-             .attr("stroke-dashoffset", totalLength)
-             .transition()
-             .duration(2000)
-             .ease("linear")
-             .attr("stroke-dashoffset", 0);
     }
     callback();
   }

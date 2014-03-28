@@ -66,21 +66,21 @@ function makeCow(stage) {
 function makeElephant(stage) {
   var e = stage.append("div")
                .attr("class", "elephant")
-               .append("div")
+               .append("svg")
+               .attr("id", "elephant")
                .attr("width", 200)
-               .attr("height", 200);
+               .attr("height", 200)
+               .attr("viewBox", "0 0 360 344")
+               .attr("preserveAspectRatio", "xMinYMin meet");
   
-  d3.xml("images/elephant.svg", function(error, svgtext) {
-    if (error) {console.log(error); return;}
-    e.html(svgtext)
-    var svg = e.select("svg");
-    svg.attr("width", 150)
-       .attr("height", 150)
-       .attr("x", 50)
-       .attr("y", 50);
+  d3.xml("images/elephant.svg", "image/svg+xml", function(xml) {
+    var importedNode = document.importNode(xml.documentElement, true);
+    importedNode.x.baseVal.value = 87;
+    importedNode.y.baseVal.value = 95;
+    e.node().appendChild(importedNode);
   });
-  
-  return e.select("div").select("svg");
+
+  return e.select("svg");
 }
        
 
@@ -283,6 +283,10 @@ queue()
     console.log("error");
   })
   .await(setTimeout(function() {
+    myelephant.transition().duration(300).attr("y", 25)
+              .transition().duration(300).attr("y", 50)
+              .transition().duration(300).attr("y", 25)
+              .transition().duration(300).attr("y", 50);
     doTrial(mystage, mystimbubble, mydrawer, myelephant, trials);
   }, 2000));
 
