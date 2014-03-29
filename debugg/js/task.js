@@ -67,11 +67,12 @@ function makeElephant(stage) {
   var e = stage.append("div")
                .attr("class", "elephant")
                .append("svg")
-               .attr("id", "elephant")
                .attr("width", 200)
                .attr("height", 200)
                .attr("viewBox", "0 0 360 344")
-               .attr("preserveAspectRatio", "xMinYMin meet");
+               .attr("preserveAspectRatio", "xMinYMin meet")
+               .append("g")
+               .attr("id", "elephant");
   
   d3.xml("images/elephant.svg", "image/svg+xml", function(xml) {
     var importedNode = document.importNode(xml.documentElement, true);
@@ -80,7 +81,7 @@ function makeElephant(stage) {
     e.node().appendChild(importedNode);
   });
 
-  return e.select("svg");
+  return e;
 }
        
 
@@ -223,13 +224,13 @@ function checkGuess(elephant, correct, guess, callback) {
   }
   console.log("correct: " + correct);
   console.log("guess: " + guess);
-  if (!equal(correct, guess)) {
-    elephant.transition().duration(300).attr("y", 25)
-            .transition().duration(300).attr("y", 50)
-            .transition().duration(300).attr("y", 25)
-            .transition().duration(300).attr("y", 50);
+  if (equal(correct, guess)) {
+    elephant.transition().duration(300).attr("transform", "translate(0,-50)")
+            .transition().duration(300).attr("transform", "translate(0,0)")
+            .transition().duration(300).attr("transform", "translate(0,-50)")
+            .transition().duration(300).attr("transform", "translate(0,0)");
   } else {
-    var lefteye = d3.select("#3163");
+    var lefteye = elephant.select("#path3163");
     var totalLength = lefteye.node().getTotalLength();
     lefteye.attr("stroke-dasharray", totalLength + " " + totalLength)
            .attr("stroke-dashoffset", totalLength)
@@ -283,10 +284,9 @@ queue()
     console.log("error");
   })
   .await(setTimeout(function() {
-    myelephant.transition().duration(300).attr("y", 25)
-              .transition().duration(300).attr("y", 50)
-              .transition().duration(300).attr("y", 25)
-              .transition().duration(300).attr("y", 50);
+    var lefteye = myelephant.select("#path3163");
+    var totalLength = lefteye.node().getTotalLength();
+    lefteye.attr("transform", "translate(0,20)");
     doTrial(mystage, mystimbubble, mydrawer, myelephant, trials);
   }, 2000));
 
