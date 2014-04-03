@@ -48,21 +48,6 @@ function makeCow(stage) {
   return cow;
 }
 
-//function makeElephant(stage) {
-//  var elephant = stage.append("div")
-//                      .attr("class", "elephant")
-//                      .append("svg")
-//                      .attr("width", 200)
-//                      .attr("height", 200)
-//                      .append("image")
-//                      .attr("xlink:href", "images/elephant.svg")
-//                      .attr("width", 150)
-//                      .attr("height", 150)
-//                      .attr("x", 50)
-//                      .attr("y", 50);
-//  return elephant;
-//}
-
 function makeElephant(stage) {
   var e = stage.append("div")
                .attr("class", "elephant")
@@ -224,21 +209,49 @@ function checkGuess(elephant, correct, guess, callback) {
   }
   console.log("correct: " + correct);
   console.log("guess: " + guess);
-  if (equal(correct, guess)) {
+  if (!equal(correct, guess)) {
     elephant.transition().duration(300).attr("transform", "translate(0,-50)")
             .transition().duration(300).attr("transform", "translate(0,0)")
             .transition().duration(300).attr("transform", "translate(0,-50)")
-            .transition().duration(300).attr("transform", "translate(0,0)");
+            .transition().duration(300).attr("transform", "translate(0,0)")
+            .each("end", callback);
   } else {
-    var lefteye = elephant.select("#path3163");
-    var totalLength = lefteye.node().getTotalLength();
-    lefteye.attr("stroke-dasharray", totalLength + " " + totalLength)
-           .attr("stroke-dashoffset", totalLength)
+    var lefteye = myelephant.select("#path3163");
+    var righteye = myelephant.select("#path3161");
+    lefteye
            .transition()
            .duration(2000)
            .ease("linear")
-           .attr("stroke-dashoffset", 0);
-  callback();
+           .attrTween("transform", function () {
+             return function (t) {
+               var radius = 6;
+               var t_angle = (4 * Math.PI) * t;
+               var t_x = radius * Math.cos(t_angle);
+               var t_y = radius * Math.sin(t_angle);
+               return "translate(" + (t_x - 6) + "," + (t_y - 2) + ")";
+             };
+           })
+           .transition()
+           .duration(0)
+           .attr("transform", "translate(0,0)");
+
+     righteye
+           .transition()
+           .duration(2000)
+           .ease("linear")
+           .attrTween("transform", function () {
+             return function (t) {
+               var radius = 6;
+               var t_angle = (4 * Math.PI) * t;
+               var t_x = radius * Math.cos(t_angle + Math.PI);
+               var t_y = radius * Math.sin(t_angle + Math.PI);
+               return "translate(" + (t_x + 6) + "," + (t_y - 2) + ")";
+             };
+           })
+           .transition()
+           .duration(0)
+           .attr("transform", "translate(0,0)")
+           .each("end", callback);
   }
 }
 
@@ -284,9 +297,6 @@ queue()
     console.log("error");
   })
   .await(setTimeout(function() {
-    var lefteye = myelephant.select("#path3163");
-    var totalLength = lefteye.node().getTotalLength();
-    lefteye.attr("transform", "translate(0,20)");
     doTrial(mystage, mystimbubble, mydrawer, myelephant, trials);
   }, 2000));
 
