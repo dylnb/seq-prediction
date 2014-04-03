@@ -107,10 +107,10 @@ function interrupt(stage, drawer, syls, conceal_num, callback) {
         .insert("button")
         .attr("type", "button")
         .attr("class", "btn btn-default btn-lg")
-        .text(function(d) { return d.text; })
+        .text(function(d) { return d; })
         .on("click",
             function(d) {
-              guess.push(d.text);
+              guess.push(d);
               clearBubble(rbubble);
               drawSyl(rbubble, d);
               if (clicks < conceal_num - 1) {
@@ -190,14 +190,19 @@ function drawExpSequence(stage, sbubble, drawer, elephant, sequence, stim_array)
 
 
 function drawSyl(bubble, syl) {
+  var s = syl;
+  if (s !== " ") {
+   s = syl_code[+syl - 1]
+  }; });
   bubble.append("div")
         .append("p")
-        .text(syl.text);
+        .text(s);
 }
 
 function checkGuess(elephant, correct, guess, callback) {
   var equal = function (correct, guess) {
-    var cor_strings = _.pluck(correct, "text");
+    // var cor_strings = _.pluck(correct, "text");
+    var cor_strings = correct;
     if (cor_strings.length !== guess.length) { return false; }
     else if (_.isEmpty(correct)) { return true; }
     else {
@@ -257,12 +262,15 @@ function checkGuess(elephant, correct, guess, callback) {
 
 function doTrial(stage, sbubble, drawer, elephant, stim_array) {
   if (stim_array.length > 0) {
-    var sequence = stim_array.shift();
+    var stim = stim_array.shift();
+    var display = stim.display;
+    var sequence = stim.stimlist;
     clearBubble(sbubble);
     clearDrawer(drawer);
-    drawSyl(sbubble, {index: 0, text: " "});
+    drawSyl(sbubble, " ");
     setTimeout(function() {
-      if (sequence.length <= conceal_number) {
+      if (display == 1 || sequence.length < 5 ||
+          sequence.length == 5 && Math.random() < 0.5) {
         drawExpSequence(stage, sbubble, drawer, elephant, sequence, stim_array);
       } else {
         drawSequence(stage, sbubble, drawer, elephant, sequence,
@@ -274,9 +282,6 @@ function doTrial(stage, sbubble, drawer, elephant, stim_array) {
   }
 }
 
-var syl_choices    = [
-  {text: "ba"}, {text: "pa"}, {text: "gu"}, {text: "bo"}
-];
 var conceal_number = 3;
 var mystage        = makeStage();
 var myelephant     = makeElephant(mystage);
@@ -285,18 +290,46 @@ var mystimbubble   = makeStimBubble(mystage);
 var mydrawer       = makeDrawer();
 var mynotes        = makeNotificationWindow();
 
-var syl_code = ["wao", "yai", "piu", "shin", "bam", "fei", "ti", "ra", "ki"];
-var trials = [];
+var syl_code    = ["wao", "yai", "piu", "shin", "bam", "fei", "ti", "ra", "ki"];
+var syl_choices = syl_code;
+var alltrials   = [];
+var mytrials    = [];
 
 queue()
   .defer(d3.csv, "data/stims2.csv", function(d) {
     var codes = d.Sequence.split(" ");
-    var syls = _.map(codes, function(code) { return {text: syl_code[+code - 1]}; });
-    trials.push(syls);
+    alltrials.push(codes);
   }, function(error, rows) {
     console.log("error");
   })
   .await(setTimeout(function() {
-    doTrial(mystage, mystimbubble, mydrawer, myelephant, trials);
+    var splitTrials = _.values(_.groupBy(alltrials, function(trial) {
+      var l = trial.length;
+      if (l < 5) { return "L"; }
+      else if (l == 5) { return "E"; }
+      else { return "R"; }
+    }));
+    var warmups   = _.shuffle(splitTrials[0]);
+    var fives     = _.shuffle(splitTrials[1]);
+    var toughies  = _.shuffle(splitTrials[2]);
+    var pretrials = _.map(
+      _.shuffle(
+        warmups.slice(0, warmups.length / 2).concat(
+          fives.slice(0, fives.length / 2)
+        )
+      ), function(trial) { return {display: 1, stimlist: trial}; }
+    );
+    var midtrials = _.map(
+      _.shuffle(
+        warmups.slice(warmups.length / 2).concat(
+          fives.slice(fives.length / 2)
+        )
+      ), function(trial) { return {display: 2, stimlist: trial}; }
+    );
+    var fintrials = _.map(toughies, function(trial) {
+      return {display: 2, stimlist: trial};
+    });
+    mytrials = pretrials.concat(midtrials, fintrials);
+    doTrial(mystage, mystimbubble, mydrawer, myelephant, mytrials);
   }, 2000));
 
