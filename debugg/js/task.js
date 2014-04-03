@@ -1,32 +1,3 @@
-// Stimuli...
-// var trials = [
-//   [
-//     {index: 1, text: "pa"},
-//     {index: 2, text: "bo"},
-//     {index: 3, text: "gu"},
-//     {index: 4, text: "pa"},
-//     {index: 5, text: "bo"},
-//     {index: 6, text: "gu"}
-//   ],
-//   [
-//     {index: 1, text: "go"},
-//     {index: 2, text: "bu"},
-//     {index: 3, text: "pa"},
-//     {index: 4, text: "pa"},
-//     {index: 5, text: "bo"},
-//     {index: 6, text: "gu"}
-//   ],
-//   [
-//     {index: 1, text: "ge"},
-//     {index: 2, text: "pu"},
-//     {index: 3, text: "pa"},
-//     {index: 4, text: "pa"},
-//     {index: 5, text: "bo"},
-//     {index: 6, text: "gu"}
-//   ]
-// ];
-
-
 function makeStage() {
   var stage = d3.select(".container")
                 .append("div")
@@ -58,14 +29,12 @@ function makeElephant(stage) {
                .attr("preserveAspectRatio", "xMinYMin meet")
                .append("g")
                .attr("id", "elephant");
-  
   d3.xml("images/elephant.svg", "image/svg+xml", function(xml) {
     var importedNode = document.importNode(xml.documentElement, true);
     importedNode.x.baseVal.value = 87;
     importedNode.y.baseVal.value = 95;
     e.node().appendChild(importedNode);
   });
-
   return e;
 }
        
@@ -131,10 +100,6 @@ function clearBubble(bubble) {
   bubble.selectAll("div").remove();
 }
 
-function clearResp(rbubble) {
-  rbubble.remove();
-}
-
 function clearDrawer(drawer) {
   drawer.selectAll("button").remove();
 }
@@ -177,7 +142,7 @@ function drawSequence(stage, sbubble, drawer, elephant, sequence,
   return prefix;
 }
 
-function drawExpSequence(stage, sbubble, drawer, elephant, sequence, stim_array) {
+function drawFreebie(stage, sbubble, drawer, elephant, sequence, stim_array) {
   var fix = setInterval(function() {
     clearBubble(sbubble);
     if (_.isEmpty(sequence)) {
@@ -238,7 +203,6 @@ function checkGuess(elephant, correct, guess, bubble, callback) {
            .transition()
            .duration(0)
            .attr("transform", "translate(0,0)");
-
      righteye
            .transition()
            .duration(2000)
@@ -270,7 +234,7 @@ function doTrial(stage, sbubble, drawer, elephant, stim_array) {
     setTimeout(function() {
       if (display == 1 || sequence.length < 5 ||
           sequence.length == 5 && Math.random() < 0.5) {
-        drawExpSequence(stage, sbubble, drawer, elephant, sequence, stim_array);
+        drawFreebie(stage, sbubble, drawer, elephant, sequence, stim_array);
       } else {
         drawSequence(stage, sbubble, drawer, elephant, sequence,
                      conceal_number, stim_array, interrupt);
@@ -286,7 +250,6 @@ var myelephant     = makeElephant(mystage);
 var mycow          = makeCow(mystage);
 var mystimbubble   = makeStimBubble(mystage);
 var mydrawer       = makeDrawer();
-var mynotes        = makeNotificationWindow();
 
 var syl_code    = ["wao", "yai", "piu", "shin", "bam", "fei", "ti", "ra", "ki"];
 var syl_choices = syl_code;
@@ -294,9 +257,10 @@ var alltrials   = [];
 var mytrials    = [];
 
 // var stims = condition == 0 ? "data/fsa.csv" : "data/cfg.csv";
-// var conceal_number = counter == 0 ? 1 : 3
+// var conceal_number = counter == 0 ? 1 : 3;
 var stims = "data/fsa.csv";
 var conceal_number = 1;
+
 queue()
   .defer(d3.csv, stims, function(d) {
     var codes = _.map(d.Sequence.split(" "),
@@ -335,4 +299,3 @@ queue()
     mytrials = pretrials.concat(midtrials, fintrials);
     doTrial(mystage, mystimbubble, mydrawer, myelephant, mytrials);
   }, 2000));
-

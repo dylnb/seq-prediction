@@ -1,1 +1,0 @@
-simple interactive sequence prediction experiment

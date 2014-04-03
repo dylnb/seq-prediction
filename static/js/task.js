@@ -5,46 +5,29 @@
  */
 
 // Initialize psiturk object
-var psiTurk = PsiTurk();
+var psiTurk = PsiTurk(uniqueId, adServerLoc);
 
-var pages = ["instruct.html", "test.html"];
+// All pages loaded in course of experiment
+var pages = [
+	"instructions/instruct-1.html",
+	"instructions/instruct-2.html",
+	"instructions/instruct-3.html",
+	"instructions/instruct-ready.html",
+	"stage.html",
+	"postquestionnaire.html"
+];
 
 psiTurk.preloadPages(pages);
 
-var instructionPages = ["instruct.html"];
-
-// Stimuli...
-var trials = [
-  [
-    {index: 1, text: "pa"},
-    {index: 2, text: "bo"},
-    {index: 3, text: "gu"},
-    {index: 4, text: "pa"},
-    {index: 5, text: "bo"},
-    {index: 6, text: "gu"}
-  ],
-  [
-    {index: 1, text: "go"},
-    {index: 2, text: "bu"},
-    {index: 3, text: "pa"},
-    {index: 4, text: "pa"},
-    {index: 5, text: "bo"},
-    {index: 6, text: "gu"}
-  ],
-  [
-    {index: 1, text: "ge"},
-    {index: 2, text: "pu"},
-    {index: 3, text: "pa"},
-    {index: 4, text: "pa"},
-    {index: 5, text: "bo"},
-    {index: 6, text: "gu"}
-  ]
+var instructionPages = [ // demo instructions
+	"instructions/instruct-1.html",
+	"instructions/instruct-2.html",
+	"instructions/instruct-3.html",
+	"instructions/instruct-ready.html"
 ];
 
-// Task object to keep track of the current phase
-var currentview;
 
-/********************
+/**********************
 * HTML manipulation
 *
 * All HTML files in the templates directory are requested 
@@ -52,20 +35,21 @@ var currentview;
 * need code to get those pages from the PsiTurk object and 
 * insert them into the document.
 *
-********************/
+**********************/
 
+/**********************
+* SEQUENCE PREDICTION *
+**********************/
 var TestPhase = function() {
 
-  function makeStage() {
-    var stage = d3.select(".container")
+  var makeStage = function() {
+    var stage = d3.select("#container-exp")
                   .append("div")
-                  .attr("class", "stage")
-                  .append("div")
-                  .attr("class", "absoluteContainer");
+                  .attr("id", "stage");
     return stage;
   }
 
-  function makeCow(stage) {
+  var makeCow = function(stage) {
     var cow = stage.append("div")
                    .attr("class", "cow")
                    .append("svg")
@@ -79,48 +63,45 @@ var TestPhase = function() {
     return cow;
   }
 
-  function makeElephant(stage) {
-    var elephant = stage.append("div")
-                        .attr("class", "elephant")
-                        .append("svg")
-                        .attr("width", 200)
-                        .attr("height", 200)
-                        .append("image")
-                        .attr("xlink:href", "static/images/elephant.svg")
-                        .attr("width", 150)
-                        .attr("height", 150)
-                        .attr("x", 50)
-                        .attr("y", 50);
-    return elephant;
+  var makeElephant = function(stage) {
+    var e = stage.append("div")
+                 .attr("class", "elephant")
+                 .append("svg")
+                 .attr("width", 200)
+                 .attr("height", 200)
+                 .attr("viewBox", "0 0 360 344")
+                 .attr("preserveAspectRatio", "xMinYMin meet")
+                 .append("g")
+                 .attr("id", "elephant");
+    d3.xml("static/images/elephant.svg", "image/svg+xml", function(xml) {
+      var importedNode = document.importNode(xml.documentElement, true);
+      importedNode.x.baseVal.value = 87;
+      importedNode.y.baseVal.value = 95;
+      e.node().appendChild(importedNode);
+    });
+    return e;
   }
 
-  function makeStimBubble(stage) {
+  var makeStimBubble = function(stage) {
     var sbubble = stage.append("div")
                        .attr("class", "stim");
     return sbubble;
   }
 
-  function makeResponseBubble(stage) {
+  var makeResponseBubble = function(stage) {
     var respbubble = stage.append("div")
                           .attr("class", "response");
     return respbubble;
   }
 
-  function makeDrawer() {
-    var drawer = d3.select(".container")
+  var makeDrawer = function() {
+    var drawer = d3.select("#container-exp")
                    .append("div")
-                   .attr("class", "syl-drawer");
+                   .attr("id", "syl-drawer");
     return drawer;
   }
 
-  function makeNotificationWindow() {
-    var notes = d3.select(".container")
-                 .append("div")
-                 .attr("class", "note-window");
-    return notes;
-  }
-
-  function interrupt(stage, drawer, syls, conceal_num, callback) {
+  var interrupt = function(stage, drawer, syls, conceal_num, callback) {
     var clicks = 0;
     var guess = [];
 
@@ -131,74 +112,97 @@ var TestPhase = function() {
           .insert("button")
           .attr("type", "button")
           .attr("class", "btn btn-default btn-lg")
-          .text(function(d) { return d.text; })
+          .text(function(d) { return syl_code[d]; })
           .on("click",
               function(d) {
-                guess.push(d.text);
+                guess.push(d);
                 clearBubble(rbubble);
                 drawSyl(rbubble, d);
                 if (clicks < conceal_num - 1) {
                   clicks++;
                 } else {
-                  rbubble.remove();
+                  // rbubble.remove();
+                  console.log("guess: ");
                   console.log.apply(console, guess);
-                  psiTurk.recordTrialData(guess);
-                  callback(guess);
+                  // this callback is basically checkGuess
+                  callback(guess, rbubble);
                 }
               });
 
   }
 
-  function clearBubble(bubble) {
+  var clearBubble = function(bubble) {
     bubble.selectAll("div").remove();
   }
 
-  function clearDrawer(drawer) {
+  var clearDrawer = function(drawer) {
     drawer.selectAll("button").remove();
   }
 
-  function clearNotes(notes) {
-    notes.selectAll("p").remove();
-  }
-
-  function drawSequence(stage, sbubble, drawer, elephant, sequence,
-                        conceal_num, stim_array, callback) {
+  var drawSequence = function(stage, sbubble, drawer, elephant, sequence,
+                              conceal_num, td, stim_array, callback) {
+    // this is the callback to checkGuess
+    var cb = function() {
+      var suffix = setInterval(function() {
+        clearBubble(sbubble);
+        if (_.isEmpty(sequence)) {
+          clearInterval(suffix);
+          doTrial(stage, sbubble, drawer, elephant, stim_array);
+        } else {
+          var syl = sequence.shift();
+          drawSyl(sbubble, syl);
+        }
+      }, 250);
+      return suffix;
+    }
     var prefix = setInterval(function() {
       clearBubble(sbubble);
       if (sequence.length == conceal_num) {
         clearInterval(prefix);
-        callback(stage, drawer, syl_choices, conceal_num,
-                 function(guess) {
-                   checkGuess(elephant, sequence, guess, function() {
-                     var suffix = setInterval(function() {
-                       clearBubble(sbubble);
-                       if (sequence.length == 0) {
-                         clearInterval(suffix);
-                         doTrial(stage, sbubble, drawer, elephant, stim_array);
-                       } else {
-                         var syl = sequence.shift();
-                         drawSyl(sbubble, syl);
-                       }
-                     }, 1000);
-                     return suffix;
-                   });
+        // this callback is interrupt
+        callback(stage, drawer, _.range(syl_code.length), conceal_num,
+                 function(guess, bubble) {
+                   td.guess = guess;
+                   psiTurk.recordTrialData(td);
+                   checkGuess(elephant, sequence, guess, bubble, cb);
                  });
       }
       else {
         var syl = sequence.shift();
         drawSyl(sbubble, syl);
       }
-    }, 1000);
+    }, 250);
     return prefix;
   }
 
-  function drawSyl(bubble, syl) {
-    bubble.append("div")
-          .append("p")
-          .text(syl.text);
+  var drawFreebie = function(stage, sbubble, drawer, elephant,
+                             sequence, td, stim_array) {
+    var fix = setInterval(function() {
+      clearBubble(sbubble);
+      if (_.isEmpty(sequence)) {
+        clearInterval(fix);
+        td.guess = [];
+        psiTurk.recordTrialData(td);
+        doTrial(stage, sbubble, drawer, elephant, stim_array);
+      } else {
+        var syl = sequence.shift();
+        drawSyl(sbubble, syl);
+      }
+    }, 250);
+    return fix;
   }
 
-  function checkGuess(elephant, correct, guess, callback) {
+  var drawSyl = function(bubble, syl) {
+    var s = syl_code[syl] || " ";
+    bubble.append("div")
+          .append("p")
+          .text(s);
+  }
+
+  var checkGuess = function(elephant, correct, guess, bubble, callback) {
+    // callback here finishes the sequence, then starts next trial
+    console.log("correct: ");
+    console.log.apply(console, correct);
     var equal = function (correct, guess) {
       if (correct.length !== guess.length) { return false; }
       else if (_.isEmpty(correct)) { return true; }
@@ -209,116 +213,206 @@ var TestPhase = function() {
         return report;
       }
     }
-    console.log("correct: " + correct);
-    console.log("guess: " + guess);
-    if (!equal(correct, guess)) {
-      elephant.transition().duration(300).attr("y", 25)
-              .transition().duration(300).attr("y", 50)
-              .transition().duration(300).attr("y", 25)
-              .transition().duration(300).attr("y", 50);
+    if (equal(correct, guess)) {
+      elephant.transition().duration(300).attr("transform", "translate(0,-50)")
+              .transition().duration(300).attr("transform", "translate(0,0)")
+              .transition().duration(300).attr("transform", "translate(0,-50)")
+              .transition().duration(300).attr("transform", "translate(0,0)")
+              .each("end", function() { bubble.remove(); callback(); });
+    } else {
+      var lefteye = myelephant.select("#path3163");
+      var righteye = myelephant.select("#path3161");
+      lefteye
+             .transition()
+             .duration(2000)
+             .ease("linear")
+             .attrTween("transform", function () {
+               return function (t) {
+                 var radius = 6;
+                 var t_angle = (4 * Math.PI) * t;
+                 var t_x = radius * Math.cos(t_angle);
+                 var t_y = radius * Math.sin(t_angle);
+                 return "translate(" + (t_x - 6) + "," + (t_y - 2) + ")";
+               };
+             })
+             .transition()
+             .duration(0)
+             .attr("transform", "translate(0,0)");
+       righteye
+             .transition()
+             .duration(2000)
+             .ease("linear")
+             .attrTween("transform", function () {
+               return function (t) {
+                 var radius = 6;
+                 var t_angle = (4 * Math.PI) * t;
+                 var t_x = radius * Math.cos(t_angle + Math.PI);
+                 var t_y = radius * Math.sin(t_angle + Math.PI);
+                 return "translate(" + (t_x + 6) + "," + (t_y - 2) + ")";
+               };
+             })
+             .transition()
+             .duration(0)
+             .attr("transform", "translate(0,0)")
+             .each("end", function() { bubble.remove(); callback(); });
     }
-    callback();
   }
 
-  function doTrial(stage, sbubble, drawer, elephant, stim_array) {
+  var doTrial = function(stage, sbubble, drawer, elephant, stim_array) {
     if (stim_array.length > 0) {
-      var sequence = stim_array.shift();
+      var stim = stim_array.shift();
+      var display = stim.display;
+      var sequence = stim.stimlist;
+      var td = {'display': display, 'sequence': sequence};
       clearBubble(sbubble);
       clearDrawer(drawer);
-      drawSyl(sbubble, {index: 0, text: "+"});
+      drawSyl(sbubble, -1);
       setTimeout(function() {
-        drawSequence(stage, sbubble, drawer, elephant, sequence,
-                     conceal_number, stim_array, interrupt);
-      }, 2000);
-    } else {
-      psiTurk.saveData({
-        success: function() {
-          d3.select(".container").append("center").text("That'll do. Thanks.");
-          d3.select(".container")
-            .append("center")
-            .append("button")
-            .attr("type", "button")
-            .attr("class", "btn btn-primary btn-lg")
-            .text("Teardown")
-            .on("click", function() { psiTurk.teardownTask(); });
-        },
-        error: function() {
-          d3.select(".container").append("center").text("Uh oh.");
+        if (display == 1 || sequence.length < 5 ||
+            sequence.length == 5 && Math.random() < 0.5) {
+          drawFreebie(stage, sbubble, drawer, elephant,
+                      sequence, td, stim_array);
+        } else {
+          drawSequence(stage, sbubble, drawer, elephant, sequence,
+                       conceal_number, td, stim_array, interrupt);
         }
-      });
+      }, 2000)
+    } else {
+      finish();
     }
   }
 
-	psiTurk.showPage('test.html');
+	var finish = function() {
+	    currentview = new Questionnaire();
+	};
 
-  var syl_choices    = [
-    {text: "ba"}, {text: "pa"}, {text: "gu"}, {text: "bo"}
-  ];
-  var conceal_number = 3;
-  if (condition == 1) { conceal_number = 1; }
+	psiTurk.showPage('stage.html');
+
   var mystage        = makeStage();
   var myelephant     = makeElephant(mystage);
   var mycow          = makeCow(mystage);
   var mystimbubble   = makeStimBubble(mystage);
   var mydrawer       = makeDrawer();
-  var mynotes        = makeNotificationWindow();
 
-  setTimeout(function() {
-    doTrial(mystage, mystimbubble, mydrawer, myelephant, trials);
-  }, 2000);
+  var syl_code    = ["wao", "yai", "piu", "shin", "bam", "fei", "ti", "ra", "ki"];
+  var syl_choices = syl_code;
+  var alltrials   = [];
+  var mytrials    = [];
 
+  var stims = condition == 0 ? "static/data/fsa.csv" : "static/data/cfg.csv";
+  var conceal_number = counterbalance == 0 ? 1 : 3;
+
+  queue()
+    .defer(d3.csv, stims, function(d) {
+      var codes = _.map(d.Sequence.split(" "),
+                        function(code) { return (+code - 1); });
+      alltrials.push(codes);
+    }, function(error, rows) {
+      console.log("error");
+    })
+    .await(setTimeout(function() {
+      var splitTrials = _.values(_.groupBy(alltrials, function(trial) {
+        var l = trial.length;
+        if (l < 5) { return "L"; }
+        else if (l == 5) { return "E"; }
+        else { return "R"; }
+      }));
+      var warmups   = _.shuffle(splitTrials[0]);
+      var fives     = _.shuffle(splitTrials[1]);
+      var toughies  = _.shuffle(splitTrials[2]);
+      var pretrials = _.map(
+        _.shuffle(
+          warmups.slice(0, warmups.length / 2).concat(
+            fives.slice(0, fives.length / 2)
+          )
+        ), function(trial) { return {display: 1, stimlist: trial}; }
+      ).slice(0,2);
+      var midtrials = _.map(
+        _.shuffle(
+          warmups.slice(warmups.length / 2).concat(
+            fives.slice(fives.length / 2)
+          )
+        ), function(trial) { return {display: 2, stimlist: trial}; }
+      ).slice(0,5);
+      var fintrials = _.map(toughies, function(trial) {
+        return {display: 2, stimlist: trial};
+      }).slice(0,5);
+      mytrials = pretrials.concat(midtrials, fintrials);
+      doTrial(mystage, mystimbubble, mydrawer, myelephant, mytrials);
+    }, 2000));
 }
+
+
+/**********************
+* Questionnaire       *
+**********************/
+
+var Questionnaire = function() {
+
+	var error_message = "<h1>Oops!</h1><p>Something went wrong submitting your HIT. This might happen if you lose your internet connection. Press the button to resubmit.</p><button id='resubmit'>Resubmit</button>";
+
+	record_responses = function() {
+
+		psiTurk.recordTrialData({'phase':'postquestionnaire', 'status':'submit'});
+
+		$('textarea').each( function(i, val) {
+			psiTurk.recordUnstructuredData(this.id, this.value);
+		});
+		$('select').each( function(i, val) {
+			psiTurk.recordUnstructuredData(this.id, this.value);		
+		});
+
+	};
+
+	prompt_resubmit = function() {
+		replaceBody(error_message);
+		$("#resubmit").click(resubmit);
+	};
+
+	resubmit = function() {
+		replaceBody("<h1>Trying to resubmit...</h1>");
+		reprompt = setTimeout(prompt_resubmit, 10000);
+		
+		psiTurk.saveData({
+			success: function() {
+        clearInterval(reprompt); 
+        psiTurk.computeBonus('compute_bonus', function(){finish()}); 
+			}, 
+			error: prompt_resubmit}
+		);
+	};
+
+	// Load the questionnaire snippet 
+	psiTurk.showPage('postquestionnaire.html');
+	psiTurk.recordTrialData({'phase':'postquestionnaire', 'status':'begin'});
+	
+	$("#next").click(function () {
+    record_responses();
+    psiTurk.saveData({
+      success: function(){
+        psiTurk.computeBonus('compute_bonus', function() { 
+          psiTurk.completeHIT(); // when finished saving compute bonus, the quit
+        }); 
+      }, 
+      error: prompt_resubmit
+    });
+	});
+
+};
+
+
+
+// Task object to keep track of the current phase
+var currentview;
 
 /*******************
  * Run Task
  ******************/
 $(window).load( function(){
     psiTurk.doInstructions(
-    	instructionPages, // a list of pages you want to display in sequence
-    	function() {
-        currentview = new TestPhase();
-      } // what you want to do when you are done with instructions
+    	instructionPages, // go through instructions
+    	function() { // begin experiment
+        currentview = new TestPhase(); 
+      }
     );
 });
-
-
-
-
-// var trials = [
-//   {
-//     reveal:  [
-//                {index: 1, text: "pa"},
-//                {index: 2, text: "bo"},
-//                {index: 3, text: "gu"},
-//              ],
-//     conceal: [
-//                {index: 4, text: "pa"},
-//                {index: 5, text: "bo"},
-//                {index: 6, text: "gu"}
-//              ]
-//   }
-//   {
-//     reveal:  [
-//                {index: 1, text: "go"},
-//                {index: 2, text: "bu"},
-//                {index: 3, text: "pa"},
-//              ],
-//     conceal: [
-//                {index: 4, text: "pa"},
-//                {index: 5, text: "bo"},
-//                {index: 6, text: "gu"}
-//              ]
-//   }
-//   {
-//     reveal:  [
-//                {index: 1, text: "ge"},
-//                {index: 2, text: "pu"},
-//                {index: 3, text: "pa"},
-//              ],
-//     conceal: [
-//                {index: 4, text: "pa"},
-//                {index: 5, text: "bo"},
-//                {index: 6, text: "gu"}
-//              ]
-//   }
-// ];
