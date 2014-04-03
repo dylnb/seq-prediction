@@ -96,18 +96,18 @@ function makeNotificationWindow() {
   return notes;
 }
 
-function interrupt(stage, drawer, syls, conceal_num, callback) {
+function interrupt(stage, drawer, syl_range, conceal_num, callback) {
   var clicks = 0;
   var guess = [];
 
   var rbubble = makeResponseBubble(stage);
   drawer.selectAll("button")
-        .data(syls)
+        .data(syl_range)
         .enter()
         .insert("button")
         .attr("type", "button")
         .attr("class", "btn btn-default btn-lg")
-        .text(function(d) { return d; })
+        .text(function(d) { return syl_code[d]; })
         .on("click",
             function(d) {
               guess.push(d);
@@ -116,10 +116,12 @@ function interrupt(stage, drawer, syls, conceal_num, callback) {
               if (clicks < conceal_num - 1) {
                 clicks++;
               } else {
-                rbubble.remove();
+                // rbubble.remove();
+                console.log("guess: ");
                 console.log.apply(console, guess);
                 // psiTurk.recordTrialData(guess);
-                callback(guess);
+                // this callback is basically checkGuess
+                callback(guess, rbubble);
               }
             });
 
@@ -143,30 +145,31 @@ function clearNotes(notes) {
 
 function drawSequence(stage, sbubble, drawer, elephant, sequence,
                       conceal_num, stim_array, callback) {
+  // this is the callback to checkGuess
+  var cb = function() {
+    var suffix = setInterval(function() {
+      clearBubble(sbubble);
+      if (_.isEmpty(sequence)) {
+        clearInterval(suffix);
+        doTrial(stage, sbubble, drawer, elephant, stim_array);
+      } else {
+        var syl = sequence.shift();
+        drawSyl(sbubble, syl);
+      }
+    }, 250);
+    return suffix;
+  }
   var prefix = setInterval(function() {
     clearBubble(sbubble);
     if (sequence.length == conceal_num) {
       clearInterval(prefix);
-      callback(stage, drawer, syl_choices, conceal_num,
-               function(guess) {
-                 checkGuess(elephant, sequence, guess, function() {
-                   var suffix = setInterval(function() {
-                     clearBubble(sbubble);
-                     if (_.isEmpty(sequence)) {
-                       clearInterval(suffix);
-                       doTrial(stage, sbubble, drawer, elephant, stim_array);
-                     } else {
-                       var syl = sequence.shift();
-                       drawSyl(sbubble, syl);
-                     }
-                   }, 250);
-                   return suffix;
-                 });
+      // this callback is interrupt
+      callback(stage, drawer, _.range(syl_code.length), conceal_num,
+               function(guess, bubble) {
+                 checkGuess(elephant, sequence, guess, bubble, cb);
                });
     }
     else {
-      console.log("drawSeq: ");
-      console.log(sequence);
       var syl = sequence.shift();
       drawSyl(sbubble, syl);
     }
@@ -190,36 +193,32 @@ function drawExpSequence(stage, sbubble, drawer, elephant, sequence, stim_array)
 
 
 function drawSyl(bubble, syl) {
-  var s = syl;
-  if (s !== " ") {
-   s = syl_code[+syl - 1]
-  }; });
+  var s = syl_code[syl] || " ";
   bubble.append("div")
         .append("p")
         .text(s);
 }
 
-function checkGuess(elephant, correct, guess, callback) {
+function checkGuess(elephant, correct, guess, bubble, callback) {
+  // callback here finishes the sequence, then starts next trial
+  console.log("correct: ");
+  console.log.apply(console, correct);
   var equal = function (correct, guess) {
-    // var cor_strings = _.pluck(correct, "text");
-    var cor_strings = correct;
-    if (cor_strings.length !== guess.length) { return false; }
+    if (correct.length !== guess.length) { return false; }
     else if (_.isEmpty(correct)) { return true; }
     else {
-      var report = (cor_strings[0] === guess[0]) &&
+      var report = (correct[0] === guess[0]) &&
                    equal(correct.slice(1, correct.length),
                          guess.slice(1, guess.length));
       return report;
     }
   }
-  console.log("correct: " + correct);
-  console.log("guess: " + guess);
-  if (!equal(correct, guess)) {
+  if (equal(correct, guess)) {
     elephant.transition().duration(300).attr("transform", "translate(0,-50)")
             .transition().duration(300).attr("transform", "translate(0,0)")
             .transition().duration(300).attr("transform", "translate(0,-50)")
             .transition().duration(300).attr("transform", "translate(0,0)")
-            .each("end", callback);
+            .each("end", function() { bubble.remove(); callback(); });
   } else {
     var lefteye = myelephant.select("#path3163");
     var righteye = myelephant.select("#path3161");
@@ -256,7 +255,7 @@ function checkGuess(elephant, correct, guess, callback) {
            .transition()
            .duration(0)
            .attr("transform", "translate(0,0)")
-           .each("end", callback);
+           .each("end", function() { bubble.remove(); callback(); });
   }
 }
 
@@ -267,7 +266,7 @@ function doTrial(stage, sbubble, drawer, elephant, stim_array) {
     var sequence = stim.stimlist;
     clearBubble(sbubble);
     clearDrawer(drawer);
-    drawSyl(sbubble, " ");
+    drawSyl(sbubble, -1);
     setTimeout(function() {
       if (display == 1 || sequence.length < 5 ||
           sequence.length == 5 && Math.random() < 0.5) {
@@ -276,13 +275,12 @@ function doTrial(stage, sbubble, drawer, elephant, stim_array) {
         drawSequence(stage, sbubble, drawer, elephant, sequence,
                      conceal_number, stim_array, interrupt);
       }
-    }, 500);
+    }, 2000)
   } else {
     d3.select(".container").append("center").text("That'll do. Thanks.");
   }
 }
 
-var conceal_number = 3;
 var mystage        = makeStage();
 var myelephant     = makeElephant(mystage);
 var mycow          = makeCow(mystage);
@@ -295,9 +293,14 @@ var syl_choices = syl_code;
 var alltrials   = [];
 var mytrials    = [];
 
+// var stims = condition == 0 ? "data/fsa.csv" : "data/cfg.csv";
+// var conceal_number = counter == 0 ? 1 : 3
+var stims = "data/fsa.csv";
+var conceal_number = 1;
 queue()
-  .defer(d3.csv, "data/stims2.csv", function(d) {
-    var codes = d.Sequence.split(" ");
+  .defer(d3.csv, stims, function(d) {
+    var codes = _.map(d.Sequence.split(" "),
+                      function(code) { return (+code - 1); });
     alltrials.push(codes);
   }, function(error, rows) {
     console.log("error");
@@ -318,17 +321,17 @@ queue()
           fives.slice(0, fives.length / 2)
         )
       ), function(trial) { return {display: 1, stimlist: trial}; }
-    );
+    ).slice(0,2);
     var midtrials = _.map(
       _.shuffle(
         warmups.slice(warmups.length / 2).concat(
           fives.slice(fives.length / 2)
         )
       ), function(trial) { return {display: 2, stimlist: trial}; }
-    );
+    ).slice(0,5);
     var fintrials = _.map(toughies, function(trial) {
       return {display: 2, stimlist: trial};
-    });
+    }).slice(0,5);
     mytrials = pretrials.concat(midtrials, fintrials);
     doTrial(mystage, mystimbubble, mydrawer, myelephant, mytrials);
   }, 2000));
