@@ -1,43 +1,80 @@
 <div id="container-instructions">
-
-    <h1>Instructions</h1>
-
-    <hr>
-
-    <div class="instructions well">
-
-        <p>
-            This is the second page of instructions
-        </p>
-        
-        <p>
-            Put some next in this paragraph
-        </p>
-
-
-        <script type="text/javascript">
-        //console.log(psiTurk.getInstructionIndicator())
-        </script>
-
+  <h1>Instructions</h1>
+  <hr>
+  <div class="instructions well">
+    <p>
+    As it happens, you, the cow, are rather excitable. In fact, every so often
+    you will get so excited with the story that you will find yourself
+    finishing the elephant's sentence. Your goal is to finish the sentence
+    correctly, exactly as the elephant planned it. Click either character
+    below to see what it will look like when you interrupt.
+    </p>
+    <div style="overflow: hidden">
+      <div class="elephant">
+        <svg width=160 height=160>
+          <image xlink:href="static/images/elephant.svg"
+            width=120 height=120 y=40 />
+        </svg>
+      </div>
+      <div class="cow">
+        <svg width="160" height="160">
+          <image xlink:href="static/images/cow.svg"
+            width="160" height="120" y=40 />
+        </svg>
+      </div>
+      <div class="stim" style="margin-left: 0; margin-top: 0;">
+      </div>
     </div>
-
-    <hr>
-
-    <div class="instructionsnav">
-        <div class="row">
-            <div class="col-xs-2">
-                <button type="button" id="next" value="next" class="btn btn-primary btn-lg previous">
-                <span class="glyphicon glyphicon-arrow-left"></span> Previous
-                </button>
-            </div>
-            <div class="col-xs-8">
-            </div>
-            <div class="col-xs-2">
-                <button type="button" id="next" value="next" class="btn btn-primary btn-lg continue">
-                Next <span class="glyphicon glyphicon-arrow-right"></span>
-                </button>
-            </div>
+  </div>
+  <hr>
+  <div class="instructionsnav">
+    <div class="row">
+      <div class="col-xs-2">
+        <button type="button" id="next" value="next" class="btn btn-primary btn-lg previous">
+          <span class="glyphicon glyphicon-arrow-left"></span> Previous
+        </button>
+      </div>
+        <div class="col-xs-8">
         </div>
+      <div class="col-xs-2">
+        <button type="button" id="next" value="next" class="btn btn-primary btn-lg continue">
+          Next <span class="glyphicon glyphicon-arrow-right"></span>
+        </button>
+      </div>
     </div>
-
+  </div>
+  <!-- <script src="/static/lib/d3-min.js" type="text/javascript"> </script> -->
+  <script type="text/javascript">
+    console.log("reading js");
+    var syl_code = ["wao", "yai", "piu", "shin", "bam", "fei", "ti", "ra", "ki"];
+    var drawSyl = function(bubble, syl) {
+      var s = syl_code[syl] || " ";
+      bubble.append("div")
+            .append("p")
+            .text(s);
+    };
+    var clearBubble = function(bubble) {
+      bubble.selectAll("div").remove();
+    };
+    var drawFreebie = function(sbubble, elephant, sequence) {
+      var fix = setInterval(function() {
+        clearBubble(sbubble);
+        if (_.isEmpty(sequence)) {
+          clearInterval(fix);
+        } else {
+          var syl = sequence.shift();
+          drawSyl(sbubble, syl);
+        }
+      }, 250);
+      return fix;
+    };
+    var el = d3.select(".elephant");
+    var sbubble = d3.select(".stim");
+    el.on("click", function() {
+      drawSyl(sbubble, -1);
+      setTimeout(function() {
+        drawFreebie(sbubble, el, [0,1,2,3]);
+      }, 500)
+    });
+  </script>
 </div>
