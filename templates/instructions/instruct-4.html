@@ -1,0 +1,192 @@
+<div id="container-instructions">
+  <h1>Instructions</h1>
+  <hr>
+  <div class="instructions well">
+    <p>
+    After you select the words that you think complete the elephant's thought,
+    the elephant will react. Like all elephants, it enjoys being understood,
+    and resents being misunderstood. So if you correctly identify the
+    remainder of the sentence, you'll see the elephant jump up and down in
+    joy, but if you incorrectly identify the remainder of the sentence, you'll
+    see the elephant's eyes roll in agitation. Either way, the elephant will
+    finish its own sentence the way it intended to all along. Click the
+    elphant below to see a sentence. When you interrupt, select "pa", "bo",
+    "gu" to see the elephant's reaction to a sypathetic continuation. Then
+    click the elephant once more, but this time when you interrupt, select
+    "gu", "bo", "pa" to see an unsympathetic reaction.
+    </p>
+    <div id="democontainer" style="overflow: hidden;">
+      <div id="demostage" style="overflow: auto; padding-bottom: 4.6em;">
+        <div class="cow">
+          <svg width="160" height="160">
+            <image xlink:href="static/images/cow.svg"
+              width="160" height="120" y=40 />
+          </svg>
+        </div>
+        <div class="stim" style="margin-left: 0; margin-top: 0;">
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="instructionsnav">
+    <div class="row">
+      <div class="col-xs-2">
+        <button type="button" id="next" value="next"
+          class="btn btn-primary btn-lg previous">
+          <span class="glyphicon glyphicon-arrow-left"></span> Previous
+        </button>
+      </div>
+        <div class="col-xs-8">
+        </div>
+      <div class="col-xs-2">
+        <button type="button" id="next" value="next"
+          class="btn btn-primary btn-lg continue">
+          Next <span class="glyphicon glyphicon-arrow-right"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- <script src="/static/lib/d3-min.js" type="text/javascript"> </script> -->
+  <script type="text/javascript">
+    var demo_syl_code = ["wao", "yai", "piu", "shin", "bam", "fei", "ti", "ra", "ki"];
+    var demosyl = function(bubble, syl) {
+      var s = demo_syl_code[syl] || " ";
+      bubble.append("div")
+            .append("p")
+            .text(s);
+    };
+    var democlear = function(bubble) {
+      bubble.selectAll("div").remove();
+    };
+    var democleardrawer = function(drawer) {
+      drawer.selectAll("button").remove();
+    }
+    var demointerrupt = function(bubble, elephant, syls, conceal_num) {
+      var clicks = 0;
+      var guess = [];
+      var rbubble = d3.select("#demostage")
+                      .append("div")
+                      .attr("class", "response")
+                      .style("margin-top", 0);
+      d3.select("#demostage")
+        .style("padding-bottom", "1em");
+      var drawer = d3.select("#democontainer")
+                     .append("div")
+                     .attr("id", "syl-drawer")
+                     .style("padding-bottom", "1em");
+      drawer.selectAll("button")
+            .data(syls)
+            .enter()
+            .insert("button")
+            .attr("type", "button")
+            .attr("class", "btn btn-default btn-lg")
+            .text(function(d) { return demo_syl_code[d]; })
+            .on("click",
+                function(d) {
+                  guess.push(d);
+                  democlear(rbubble);
+                  demosyl(rbubble, d);
+                  if (clicks < conceal_num - 1) {
+                    clicks++;
+                  } else {
+                    drawer.selectAll("button")
+                          .property("disabled", true);
+                    democheck(rbubble, drawer, elephant, guess);
+                  }
+                });
+    };
+    var democheck = function(bubble, drawer, elephant, guess) {
+      // callback here finishes the sequence, then starts next trial
+      if (_.isEqual([0,1,2], guess)) {
+        elephant.transition().duration(300).attr("transform", "translate(0,-50)")
+                .transition().duration(300).attr("transform", "translate(0,0)")
+                .transition().duration(300).attr("transform", "translate(0,-50)")
+                .transition().duration(300).attr("transform", "translate(0,0)")
+                .each("end", function() {
+                  d3.select("#demostage")
+                    .style("padding-bottom", "4.6em");
+                  drawer.remove();
+                  bubble.remove();
+                });
+      } else {
+        var lefteye = elephant.select("#path3163");
+        var righteye = elephant.select("#path3161");
+        lefteye
+          .transition()
+          .duration(2000)
+          .ease("linear")
+          .attrTween("transform", function () {
+            return function (t) {
+              var radius = 6;
+              var t_angle = (4 * Math.PI) * t;
+              var t_x = radius * Math.cos(t_angle);
+              var t_y = radius * Math.sin(t_angle);
+              return "translate(" + (t_x - 6) + "," + (t_y - 2) + ")";
+            };
+          })
+          .transition()
+          .duration(0)
+          .attr("transform", "translate(0,0)");
+         righteye
+           .transition()
+           .duration(2000)
+           .ease("linear")
+           .attrTween("transform", function () {
+             return function (t) {
+               var radius = 6;
+               var t_angle = (4 * Math.PI) * t;
+               var t_x = radius * Math.cos(t_angle + Math.PI);
+               var t_y = radius * Math.sin(t_angle + Math.PI);
+               return "translate(" + (t_x + 6) + "," + (t_y - 2) + ")";
+             };
+           })
+           .transition()
+           .duration(0)
+           .attr("transform", "translate(0,0)")
+           .each("end", function() {
+             d3.select("#demostage")
+               .style("padding-bottom", "4.6em");
+             drawer.remove();
+             bubble.remove();
+           });
+      }
+    };
+    var doDemoSequence = function(bubble, elephant, sequence, conceal_num) {
+      var prefix = setInterval(function() {
+        democlear(bubble);
+        if (sequence.length === conceal_num) {
+          clearInterval(prefix);
+          // this callback is demointerrupt
+          demointerrupt(bubble, elephant, _.range(demo_syl_code.length), conceal_num);
+        }
+        else {
+          var syl = sequence.shift();
+          demosyl(bubble, syl);
+        }
+      }, 250);
+      return prefix;
+    };
+    var el = d3.select("#demostage")
+               .insert("div", ".cow")
+               .attr("class", "elephant")
+               .append("svg")
+               .attr("width", 160)
+               .attr("height", 160)
+               .attr("viewBox", "0 0 360 344")
+               .attr("preserveAspectRatio", "xMinYMin meet")
+               .append("g")
+               .attr("id", "elephant");
+    d3.xml("static/images/elephant.svg", "image/svg+xml", function(xml) {
+      var importedNode = document.importNode(xml.documentElement, true);
+      importedNode.y.baseVal.value = 95;
+      el.node().appendChild(importedNode);
+    });
+    var sb = d3.select(".stim");
+    el.on("click", function() {
+      setTimeout(function() {
+        doDemoSequence(sb, el, [1,2,3,2,1,2,3], 3);
+      }, 500)
+    });
+  </script>
+</div>

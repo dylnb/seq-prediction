@@ -12,8 +12,11 @@ var pages = [
 	"instructions/instruct-1.html",
 	"instructions/instruct-2.html",
 	"instructions/instruct-3.html",
+  "instructions/instruct-4.html",
+  "instructions/instruct-5.html",
 	"instructions/instruct-ready.html",
-	"stage.html",
+  "practicestage.html",
+	"teststage.html",
 	"postquestionnaire.html"
 ];
 
@@ -23,6 +26,8 @@ var instructionPages = [ // demo instructions
 	"instructions/instruct-1.html",
 	"instructions/instruct-2.html",
 	"instructions/instruct-3.html",
+  "instructions/instruct-4.html",
+  "instructions/instruct-5.html",
 	"instructions/instruct-ready.html"
 ];
 
@@ -37,17 +42,17 @@ var instructionPages = [ // demo instructions
 *
 **********************/
 
-/**********************
-* SEQUENCE PREDICTION *
-**********************/
-var TestPhase = function() {
+/***********************
+ * SEQUENCE PREDICTION *
+ ***********************/
+var SeqPredict = function(stimuli, conceal_number, stage_page) {
 
   var makeStage = function() {
     var stage = d3.select("#container-exp")
                   .append("div")
                   .attr("id", "stage");
     return stage;
-  }
+  };
 
   var makeCow = function(stage) {
     var cow = stage.append("div")
@@ -61,7 +66,7 @@ var TestPhase = function() {
                    .attr("height", 150)
                    .attr("y", 50);
     return cow;
-  }
+  };
 
   var makeElephant = function(stage) {
     var e = stage.append("div")
@@ -80,31 +85,30 @@ var TestPhase = function() {
       e.node().appendChild(importedNode);
     });
     return e;
-  }
+  };
 
   var makeStimBubble = function(stage) {
     var sbubble = stage.append("div")
                        .attr("class", "stim");
     return sbubble;
-  }
+  };
 
   var makeResponseBubble = function(stage) {
     var respbubble = stage.append("div")
                           .attr("class", "response");
     return respbubble;
-  }
+  };
 
   var makeDrawer = function() {
     var drawer = d3.select("#container-exp")
                    .append("div")
                    .attr("id", "syl-drawer");
     return drawer;
-  }
+  };
 
-  var interrupt = function(stage, drawer, syls, conceal_num, callback) {
+  var interrupt = function(stage, drawer, syls, conceal, callback) {
     var clicks = 0;
     var guess = [];
-
     var rbubble = makeResponseBubble(stage);
     drawer.selectAll("button")
           .data(syls)
@@ -118,7 +122,7 @@ var TestPhase = function() {
                 guess.push(d);
                 clearBubble(rbubble);
                 drawSyl(rbubble, d);
-                if (clicks < conceal_num - 1) {
+                if (clicks < conceal - 1) {
                   clicks++;
                 } else {
                   // rbubble.remove();
@@ -129,25 +133,25 @@ var TestPhase = function() {
                 }
               });
 
-  }
+  };
 
   var clearBubble = function(bubble) {
     bubble.selectAll("div").remove();
-  }
+  };
 
   var clearDrawer = function(drawer) {
     drawer.selectAll("button").remove();
-  }
+  };
 
   var drawSequence = function(stage, sbubble, drawer, elephant, sequence,
-                              conceal_num, td, stim_array, callback) {
+                              conceal, td, stim_array, callback) {
     // this is the callback to checkGuess
     var cb = function() {
       var suffix = setInterval(function() {
         clearBubble(sbubble);
         if (_.isEmpty(sequence)) {
           clearInterval(suffix);
-          doTrial(stage, sbubble, drawer, elephant, stim_array);
+          doTrial(stage, sbubble, drawer, elephant, conceal, stim_array);
         } else {
           var syl = sequence.shift();
           drawSyl(sbubble, syl);
@@ -157,10 +161,10 @@ var TestPhase = function() {
     }
     var prefix = setInterval(function() {
       clearBubble(sbubble);
-      if (sequence.length == conceal_num) {
+      if (sequence.length == conceal) {
         clearInterval(prefix);
         // this callback is interrupt
-        callback(stage, drawer, _.range(syl_code.length), conceal_num,
+        callback(stage, drawer, _.range(syl_code.length), conceal,
                  function(guess, bubble) {
                    td.guess = guess;
                    psiTurk.recordTrialData(td);
@@ -173,92 +177,84 @@ var TestPhase = function() {
       }
     }, 250);
     return prefix;
-  }
+  };
 
   var drawFreebie = function(stage, sbubble, drawer, elephant,
-                             sequence, td, stim_array) {
+                             sequence, td, conceal, stim_array) {
     var fix = setInterval(function() {
       clearBubble(sbubble);
       if (_.isEmpty(sequence)) {
         clearInterval(fix);
         td.guess = [];
         psiTurk.recordTrialData(td);
-        doTrial(stage, sbubble, drawer, elephant, stim_array);
+        doTrial(stage, sbubble, drawer, elephant, conceal, stim_array);
       } else {
         var syl = sequence.shift();
         drawSyl(sbubble, syl);
       }
     }, 250);
     return fix;
-  }
+  };
 
   var drawSyl = function(bubble, syl) {
     var s = syl_code[syl] || " ";
     bubble.append("div")
           .append("p")
           .text(s);
-  }
+  };
 
   var checkGuess = function(elephant, correct, guess, bubble, callback) {
     // callback here finishes the sequence, then starts next trial
     console.log("correct: ");
     console.log.apply(console, correct);
-    var equal = function (correct, guess) {
-      if (correct.length !== guess.length) { return false; }
-      else if (_.isEmpty(correct)) { return true; }
-      else {
-        var report = (correct[0] === guess[0]) &&
-                     equal(correct.slice(1, correct.length),
-                           guess.slice(1, guess.length));
-        return report;
-      }
-    }
-    if (equal(correct, guess)) {
+    if (_.isEqual(correct, guess)) {
       elephant.transition().duration(300).attr("transform", "translate(0,-50)")
               .transition().duration(300).attr("transform", "translate(0,0)")
               .transition().duration(300).attr("transform", "translate(0,-50)")
               .transition().duration(300).attr("transform", "translate(0,0)")
               .each("end", function() { bubble.remove(); callback(); });
     } else {
-      var lefteye = myelephant.select("#path3163");
-      var righteye = myelephant.select("#path3161");
+      var lefteye = elephant.select("#path3163");
+      var righteye = elephant.select("#path3161");
       lefteye
-             .transition()
-             .duration(2000)
-             .ease("linear")
-             .attrTween("transform", function () {
-               return function (t) {
-                 var radius = 6;
-                 var t_angle = (4 * Math.PI) * t;
-                 var t_x = radius * Math.cos(t_angle);
-                 var t_y = radius * Math.sin(t_angle);
-                 return "translate(" + (t_x - 6) + "," + (t_y - 2) + ")";
-               };
-             })
-             .transition()
-             .duration(0)
-             .attr("transform", "translate(0,0)");
+        .transition()
+        .duration(2000)
+        .ease("linear")
+        .attrTween("transform", function () {
+          return function (t) {
+            var radius = 6;
+            var t_angle = (4 * Math.PI) * t;
+            var t_x = radius * Math.cos(t_angle);
+            var t_y = radius * Math.sin(t_angle);
+            return "translate(" + (t_x - 6) + "," + (t_y - 2) + ")";
+          };
+        })
+        .transition()
+        .duration(0)
+        .attr("transform", "translate(0,0)");
        righteye
-             .transition()
-             .duration(2000)
-             .ease("linear")
-             .attrTween("transform", function () {
-               return function (t) {
-                 var radius = 6;
-                 var t_angle = (4 * Math.PI) * t;
-                 var t_x = radius * Math.cos(t_angle + Math.PI);
-                 var t_y = radius * Math.sin(t_angle + Math.PI);
-                 return "translate(" + (t_x + 6) + "," + (t_y - 2) + ")";
-               };
-             })
-             .transition()
-             .duration(0)
-             .attr("transform", "translate(0,0)")
-             .each("end", function() { bubble.remove(); callback(); });
+         .transition()
+         .duration(2000)
+         .ease("linear")
+         .attrTween("transform", function () {
+           return function (t) {
+             var radius = 6;
+             var t_angle = (4 * Math.PI) * t;
+             var t_x = radius * Math.cos(t_angle + Math.PI);
+             var t_y = radius * Math.sin(t_angle + Math.PI);
+             return "translate(" + (t_x + 6) + "," + (t_y - 2) + ")";
+           };
+         })
+         .transition()
+         .duration(0)
+         .attr("transform", "translate(0,0)")
+         .each("end", function() { bubble.remove(); callback(); });
     }
-  }
+  };
 
-  var doTrial = function(stage, sbubble, drawer, elephant, stim_array) {
+  var doTrial = function(stage, sbubble, drawer, elephant, conceal, stim_array) {
+    console.log("stim_array: ");
+    console.log.apply(console, stim_array);
     if (stim_array.length > 0) {
       var stim = stim_array.shift();
       var display = stim.display;
@@ -271,81 +267,89 @@ var TestPhase = function() {
         if (display == 1 || sequence.length < 5 ||
             sequence.length == 5 && Math.random() < 0.5) {
           drawFreebie(stage, sbubble, drawer, elephant,
-                      sequence, td, stim_array);
+                      sequence, td, conceal, stim_array);
         } else {
           drawSequence(stage, sbubble, drawer, elephant, sequence,
-                       conceal_number, td, stim_array, interrupt);
+                       conceal, td, stim_array, interrupt);
         }
       }, 2000)
     } else {
       finish();
     }
-  }
+  };
 
 	var finish = function() {
+    if (_.isEqual(stage_page, "teststage.html")) {
+      console.log(stage_page);
 	    currentview = new Questionnaire();
+    } else {
+      d3.select("#container-exp")
+        .append("hr");
+
+      var row = d3.select("#container-exp")
+        .append("div")
+        .attr("class", "instructionsnav")
+        .append("div")
+        .attr("class", "row");
+
+      prevbutton = row.append("div")
+        .attr("class", "col-xs-2")
+        .append("button")
+        .attr("type", "button")
+        .attr("id", "next")
+        .attr("value", "next")
+        .attr("class", "btn btn-primary btn-lg previous");
+
+      prevbutton
+        .append("span")
+        .attr("class", "glyphicon glyphicon-arrow-left");
+      prevbutton
+        .text("Previous");
+
+      row.append("div")
+        .attr("class", "col-xs-8");
+      
+      nextbutton = row.append("div")
+        .attr("class", "col-xs-2")
+        .append("button")
+        .attr("type", "button")
+        .attr("id", "next")
+        .attr("value", "next")
+        .attr("class", "btn btn-primary btn-lg continue");
+
+      nextbutton
+        .text("Next");
+      nextbutton
+        .append("span")
+        .attr("class", "glyphicon glyphicon-arrow-right");
+    }
 	};
 
-	psiTurk.showPage('stage.html');
+	psiTurk.showPage(stage_page);
 
-  var mystage        = makeStage();
-  var myelephant     = makeElephant(mystage);
-  var mycow          = makeCow(mystage);
-  var mystimbubble   = makeStimBubble(mystage);
-  var mydrawer       = makeDrawer();
+  var mystage      = makeStage();
+  var myelephant   = makeElephant(mystage);
+  var mycow        = makeCow(mystage);
+  var mystimbubble = makeStimBubble(mystage);
+  var mydrawer     = makeDrawer();
+  var myconceal    = conceal_number;
 
   var syl_code    = ["wao", "yai", "piu", "shin", "bam", "fei", "ti", "ra", "ki"];
   var syl_choices = syl_code;
-  var alltrials   = [];
-  var mytrials    = [];
+  var mytrials    = stimuli;
 
-  var stims = condition == 0 ? "static/data/fsa.csv" : "static/data/cfg.csv";
-  var conceal_number = counterbalance == 0 ? 1 : 3;
+  setTimeout(function() {
+    console.log("conceal: " + myconceal);
+    console.log.apply(console, mytrials);
+    doTrial(mystage, mystimbubble, mydrawer, myelephant, myconceal, mytrials);
+  }, 1000);
 
-  queue()
-    .defer(d3.csv, stims, function(d) {
-      var codes = _.map(d.Sequence.split(" "),
-                        function(code) { return (+code - 1); });
-      alltrials.push(codes);
-    }, function(error, rows) {
-      console.log("error");
-    })
-    .await(setTimeout(function() {
-      var splitTrials = _.values(_.groupBy(alltrials, function(trial) {
-        var l = trial.length;
-        if (l < 5) { return "L"; }
-        else if (l == 5) { return "E"; }
-        else { return "R"; }
-      }));
-      var warmups   = _.shuffle(splitTrials[0]);
-      var fives     = _.shuffle(splitTrials[1]);
-      var toughies  = _.shuffle(splitTrials[2]);
-      var pretrials = _.map(
-        _.shuffle(
-          warmups.slice(0, warmups.length / 2).concat(
-            fives.slice(0, fives.length / 2)
-          )
-        ), function(trial) { return {display: 1, stimlist: trial}; }
-      ).slice(0,2);
-      var midtrials = _.map(
-        _.shuffle(
-          warmups.slice(warmups.length / 2).concat(
-            fives.slice(fives.length / 2)
-          )
-        ), function(trial) { return {display: 2, stimlist: trial}; }
-      ).slice(0,5);
-      var fintrials = _.map(toughies, function(trial) {
-        return {display: 2, stimlist: trial};
-      }).slice(0,5);
-      mytrials = pretrials.concat(midtrials, fintrials);
-      doTrial(mystage, mystimbubble, mydrawer, myelephant, mytrials);
-    }, 2000));
-}
+};
 
 
-/**********************
-* Questionnaire       *
-**********************/
+/*****************
+ * QUESTIONNAIRE *
+ *****************/
 
 var Questionnaire = function() {
 
@@ -406,14 +410,60 @@ var Questionnaire = function() {
 // Task object to keep track of the current phase
 var currentview;
 
-/*******************
- * Run Task
- ******************/
-$(window).load( function(){
-    psiTurk.doInstructions(
-    	instructionPages, // go through instructions
-    	function() { // begin experiment
-        currentview = new TestPhase(); 
-      }
-    );
+/************
+ * RUN TASK *
+ ************/
+$(window).load(function(){
+  psiTurk.doInstructions(
+    instructionPages, // go through instructions
+    function() { // begin experiment
+      var stimfile = condition === 0 ? "static/data/fsa.csv"
+                                     : "static/data/cfg.csv";
+      var hide = counterbalance === 0 ? 1 : 3;
+      var stims = [];
+      var randstims = [];
+      queue()
+        .defer(d3.csv, stimfile, function(d) {
+          console.log("starting deferral");
+          var codes = _.map(d.Sequence.split(" "),
+                            function(code) { return (+code - 1); });
+          stims.push(codes);
+        }, function(error, rows) {
+          console.log("error");
+          console.log.apply(console, stims);
+        })
+        .await(setTimeout(function() {
+          console.log("starting awaital");
+          var splitStims = _.values(_.groupBy(stims, function(trial) {
+            var l = trial.length;
+            if (l < 5) { return "L"; }
+            else if (l == 5) { return "E"; }
+            else { return "R"; }
+          }));
+          var warmups   = _.shuffle(splitStims[0]);
+          var fives     = _.shuffle(splitStims[1]);
+          var toughies  = _.shuffle(splitStims[2]);
+          var pretrials = _.map(
+            _.shuffle(
+              warmups.slice(0, warmups.length / 2).concat(
+                fives.slice(0, fives.length / 2)
+              )
+            ), function(trial) { return {display: 1, stimlist: trial}; }
+          ).slice(0,2);
+          var midtrials = _.map(
+            _.shuffle(
+              warmups.slice(warmups.length / 2).concat(
+                fives.slice(fives.length / 2)
+              )
+            ), function(trial) { return {display: 2, stimlist: trial}; }
+          ).slice(0,5);
+          var fintrials = _.map(toughies, function(trial) {
+            return {display: 2, stimlist: trial};
+          }).slice(0,5);
+          randstims = pretrials.concat(midtrials, fintrials);
+          console.log("randstims");
+          console.log.apply(console, randstims);
+          currentview = new SeqPredict(randstims, hide, "teststage.html");
+        }, 1000));
+  });
 });
