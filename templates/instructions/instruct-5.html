@@ -1,26 +1,55 @@
-<script type="text/javascript">
-  var practicestimfile = condition === 0 ? "static/data/practicefsa.csv"
-                                         : "static/data/practicecfg.csv";
-  var practicehide = counterbalance === 0 ? 1 : 3;
-  var stims = [];
-  queue()
-    .defer(d3.csv, practicestimfile, function(d) {
-      console.log("starting deferral");
-      var codes = _.map(d.Sequence.split(" "),
-                        function(code) { return (+code - 1); });
-      stims.push(codes);
-    }, function(error, rows) {
-      console.log("error");
-      console.log.apply(console, stims);
-    })
-    .await(setTimeout(function() {
-      console.log("starting awaital");
-      var practicestims = _.map(stims, function(trial) {
-        return {display: 0, stimlist: trial};
-      }).slice(0,5);
-      console.log("practicestims");
-      console.log.apply(console, practicestims);
-      currentview = new SeqPredict(practicestims, practicehide,
-                                   "practicestage.html");
-    }, 1000));
-</script>
+<div id="container-exp">
+  <h1>Practice</h1>
+  <hr>
+
+  <!-- prediction here -->
+
+  <hr id="instheader" class="hidden">
+  <div class="instructionsnav hidden">
+    <div class="row">
+      <div class="col-xs-2">
+        <button type="button" id="next" value="next"
+          class="btn btn-primary btn-lg previous">
+          <span class="glyphicon glyphicon-arrow-left"></span> Previous
+        </button>
+      </div>
+      <div class="col-xs-8">
+      </div>
+      <div class="col-xs-2">
+        <button type="button" id="next" value="next"
+          class="btn btn-primary btn-lg continue">
+          Next <span class="glyphicon glyphicon-arrow-right"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var practicestimfile = condition === 0 ? "static/data/practicefsa.csv"
+                                           : "static/data/practicecfg.csv";
+    var practicehide = counterbalance === 0 ? 1 : 3;
+    var stims = [];
+    queue()
+      .defer(d3.csv, practicestimfile, function(d) {
+        console.log("starting deferral");
+        var codes = _.map(d.Sequence.split(" "),
+                          function(code) { return (+code - 1); });
+        stims.push(codes);
+      }, function(error, rows) {
+        console.log("error");
+        console.log.apply(console, stims);
+      })
+      .await(setTimeout(function() {
+        console.log("starting awaital");
+        var practicestims = _.map(stims, function(trial) {
+          return {display: 0, stimlist: trial};
+        }).slice(0,5);
+        console.log("practicestims");
+        console.log.apply(console, practicestims);
+        currentview = new SeqPredict(practicestims, practicehide,
+                                     false, function() {
+          d3.selectAll(".hidden").classed("hidden", false);
+        });
+      }, 10));
+  </script>
+</div>

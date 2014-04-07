@@ -238,3 +238,7 @@ div.elephant {
   right: -30px;
   top: 51px;
 }
+
+.hidden {
+  display: none;
+}

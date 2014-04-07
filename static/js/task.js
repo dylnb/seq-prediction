@@ -15,8 +15,7 @@ var pages = [
   "instructions/instruct-4.html",
   "instructions/instruct-5.html",
 	"instructions/instruct-ready.html",
-  "practicestage.html",
-	"teststage.html",
+  "stage.html",
 	"postquestionnaire.html"
 ];
 
@@ -45,11 +44,11 @@ var instructionPages = [ // demo instructions
 /***********************
  * SEQUENCE PREDICTION *
  ***********************/
-var SeqPredict = function(stimuli, conceal_number, stage_page) {
+var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
 
   var makeStage = function() {
     var stage = d3.select("#container-exp")
-                  .append("div")
+                  .insert("div", "#instheader")
                   .attr("id", "stage");
     return stage;
   };
@@ -101,7 +100,7 @@ var SeqPredict = function(stimuli, conceal_number, stage_page) {
 
   var makeDrawer = function() {
     var drawer = d3.select("#container-exp")
-                   .append("div")
+                   .insert("div", "#instheader")
                    .attr("id", "syl-drawer");
     return drawer;
   };
@@ -274,58 +273,61 @@ var SeqPredict = function(stimuli, conceal_number, stage_page) {
         }
       }, 2000)
     } else {
-      finish();
+      exp_callback();
     }
   };
 
-	var finish = function() {
-    if (_.isEqual(stage_page, "teststage.html")) {
-      console.log(stage_page);
-	    currentview = new Questionnaire();
-    } else {
-      d3.select("#container-exp")
-        .append("hr");
+// 	var finish = function() {
+//     if (!callback) {
+//       console.log(stage_page);
+// 	    currentview = new Questionnaire();
+//     } else {
+//       d3.select("#container-exp")
+//         .append("hr");
 
-      var row = d3.select("#container-exp")
-        .append("div")
-        .attr("class", "instructionsnav")
-        .append("div")
-        .attr("class", "row");
+//       var row = d3.select("#container-exp")
+//         .append("div")
+//         .attr("class", "instructionsnav")
+//         .append("div")
+//         .attr("class", "row");
 
-      prevbutton = row.append("div")
-        .attr("class", "col-xs-2")
-        .append("button")
-        .attr("type", "button")
-        .attr("id", "next")
-        .attr("value", "next")
-        .attr("class", "btn btn-primary btn-lg previous");
+//       prevbutton = row.append("div")
+//         .attr("class", "col-xs-2")
+//         .append("button")
+//         .attr("type", "button")
+//         .attr("id", "next")
+//         .attr("value", "next")
+//         .attr("class", "btn btn-primary btn-lg previous");
 
-      prevbutton
-        .append("span")
-        .attr("class", "glyphicon glyphicon-arrow-left");
-      prevbutton
-        .text("Previous");
+//       prevbutton
+//         .append("span")
+//         .attr("class", "glyphicon glyphicon-arrow-left");
+//       prevbutton
+//         .text("Previous");
 
-      row.append("div")
-        .attr("class", "col-xs-8");
+//       row.append("div")
+//         .attr("class", "col-xs-8");
       
-      nextbutton = row.append("div")
-        .attr("class", "col-xs-2")
-        .append("button")
-        .attr("type", "button")
-        .attr("id", "next")
-        .attr("value", "next")
-        .attr("class", "btn btn-primary btn-lg continue");
+//       nextbutton = row.append("div")
+//         .attr("class", "col-xs-2")
+//         .append("button")
+//         .attr("type", "button")
+//         .attr("id", "next")
+//         .attr("value", "next")
+//         .attr("class", "btn btn-primary btn-lg continue");
 
-      nextbutton
-        .text("Next");
-      nextbutton
-        .append("span")
-        .attr("class", "glyphicon glyphicon-arrow-right");
-    }
-	};
+//       nextbutton
+//         .text("Next");
+//       nextbutton
+//         .append("span")
+//         .attr("class", "glyphicon glyphicon-arrow-right");
+//     }
+// 	};
 
-	psiTurk.showPage(stage_page);
+	// psiTurk.showPage(stage_page);
+  if (practice) {
+    psiTurk.showPage("stage.html");
+  }
 
   var mystage      = makeStage();
   var myelephant   = makeElephant(mystage);
@@ -463,7 +465,10 @@ $(window).load(function(){
           randstims = pretrials.concat(midtrials, fintrials);
           console.log("randstims");
           console.log.apply(console, randstims);
-          currentview = new SeqPredict(randstims, hide, "teststage.html");
+          currentview = new SeqPredict(randstims, hide, true,
+                                       function() {
+                                         currentview = new Questionnaire();
+                                       });
         }, 1000));
   });
 });
