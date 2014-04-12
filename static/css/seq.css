@@ -121,32 +121,20 @@ strong {
 
 div.cow {
   float: right;
+  padding-top: 5em;
 }
 
 div.elephant {
   float: left;
-}
-
-.stim {
-  float: left;
-  position: relative;
-  width: 175px;
-  height: 140px;
-  padding: 0px;
-  margin-left: 2em;
-  margin-top: 50px;
-  background: #FFFFFF;
-  -webkit-border-radius: 40px;
-  -moz-border-radius: 40px;
-  border-radius: 40px;
-  border: #606388 solid 6px;
+  padding-top: 5em;
 }
 
 .stim div {
-  position: absolute;
+  position: relative;
   display: table;
   height: 90%;
   width: 100%;
+  padding-right: 12px;
 }
 
 .stim div p {
@@ -155,33 +143,123 @@ div.elephant {
   text-align: center;
   font-size:48px;
   color: #606388;
+  padding-left: 12px;
 }
 
-.stim:after {
-  content: '';
-  position: absolute;
-  border-style: solid;
-  border-width: 15px 15px 15px 0;
-  border-color: transparent #FFFFFF;
-  display: block;
-  width: 0;
-  z-index: 1;
-  left: -15px;
-  top: 56px;
+.stim {
+  float: left;
+  position: relative;
+  min-width: 175px;
+  height: 140px;
+  padding: 0px;
+  /* margin-left: 2em; */
+  /* margin-top: 50px; */
+  /* background: #FFFFFF; */
+  /* -webkit-border-radius: 40px; */
+  /* -moz-border-radius: 40px; */
+  /* border-radius: 40px; */
+  /* border: #606388 solid 6px; */
+
+  /* position:relative; */
+  /* padding: 0; */
+  margin:1em 0 3em;
+  border:10px solid #606388;
+  /* css3 */
+  -webkit-border-radius:20px;
+  -moz-border-radius:20px;
+  border-radius:20px;
 }
 
+/* creates larger curve */
 .stim:before {
-  content: '';
-  position: absolute;
-  border-style: solid;
-  border-width: 20px 20px 20px 0;
-  border-color: transparent #606388;
-  display: block;
-  width: 0;
-  z-index: 0;
-  left: -26px;
-  top: 51px;
+  /* content: ''; */
+  /* position: absolute; */
+  /* border-style: solid; */
+  /* border-width: 20px 20px 20px 0; */
+  /* border-color: transparent #606388; */
+  /* display: block; */
+  /* width: 0; */
+  /* z-index: 0; */
+  /* left: -26px; */
+  /* top: 51px; */
+
+  content:"";
+  position:absolute;
+  z-index:10;
+  bottom:-40px;
+  left:50px;
+  width:50px;
+  height:30px;
+  border-style:solid;
+  border-width:0 10px 10px 0;
+  border-color:#606388;
+  background:transparent;
+  /* css3 */
+  -webkit-border-bottom-right-radius:80px 50px;
+  -moz-border-radius-bottomright:80px 50px;
+  border-bottom-right-radius:80px 50px;
+  /* reduce the damage in FF3.0 */
+  display:block;
 }
+
+/* creates smaller curve */
+.stim:after {
+  /* content: ''; */
+  /* position: absolute; */
+  /* border-style: solid; */
+  /* border-width: 15px 15px 15px 0; */
+  /* border-color: transparent #FFFFFF; */
+  /* display: block; */
+  /* width: 0; */
+  /* z-index: 1; */
+  /* left: -15px; */
+  /* top: 56px; */
+
+  content:"";
+  position:absolute;
+  z-index:10;
+  bottom:-40px;
+  left:50px;
+  width:20px;
+  height:30px;
+  border-style:solid;
+  border-width:0 10px 10px 0;
+  border-color:#606388;
+  background:transparent;
+  /* css3 */
+  -webkit-border-bottom-right-radius:40px 50px;
+  -moz-border-radius-bottomright:40px 50px;
+  border-bottom-right-radius:40px 50px;
+  /* reduce the damage in FF3.0 */
+  display:block;
+}
+
+/* creates a small circle to produce a rounded point where the two curves meet */
+.stim > :first-child:before {
+  content:"";
+  position:absolute;
+  bottom:-52px;
+  left:47px;
+  width:10px;
+  height:10px;
+  background:#606388;
+  /* css3 */
+  -webkit-border-radius:10px;
+  -moz-border-radius:10px;
+  border-radius:10px;
+}
+
+/* creates a white rectangle to cover part of the oval border*/
+.stim > :first-child:after {
+  content:"";
+  position:absolute;
+  bottom:-22px;
+  left:70px;
+  width:20px;
+  height:10px;
+  background:#fff;
+}
+
 
 .response {
   float: right;
@@ -190,7 +268,7 @@ div.elephant {
   height: 140px;
   padding: 0px;
   margin-right: 2em;
-  margin-top: 50px;
+  margin-top: 9em;
   background: #FFFFFF;
   -webkit-border-radius: 40px;
   -moz-border-radius: 40px;

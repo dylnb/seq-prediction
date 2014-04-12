@@ -9,24 +9,24 @@ var psiTurk = PsiTurk(uniqueId, adServerLoc);
 
 // All pages loaded in course of experiment
 var pages = [
-	"instructions/instruct-1.html",
-	"instructions/instruct-2.html",
-	"instructions/instruct-3.html",
-  "instructions/instruct-4.html",
-  "instructions/instruct-5.html",
+	// "instructions/instruct-1.html",
+	// "instructions/instruct-2.html",
+	// "instructions/instruct-3.html",
+  // "instructions/instruct-4.html",
+  // "instructions/instruct-5.html",
 	"instructions/instruct-ready.html",
-  "stage.html",
+  "teststage.html",
 	"postquestionnaire.html"
 ];
 
 psiTurk.preloadPages(pages);
 
 var instructionPages = [ // demo instructions
-	"instructions/instruct-1.html",
-	"instructions/instruct-2.html",
-	"instructions/instruct-3.html",
-  "instructions/instruct-4.html",
-  "instructions/instruct-5.html",
+	// "instructions/instruct-1.html",
+	// "instructions/instruct-2.html",
+	// "instructions/instruct-3.html",
+  // "instructions/instruct-4.html",
+  // "instructions/instruct-5.html",
 	"instructions/instruct-ready.html"
 ];
 
@@ -88,7 +88,8 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
 
   var makeStimBubble = function(stage) {
     var sbubble = stage.append("div")
-                       .attr("class", "stim");
+                       .attr("class", "stim")
+                       .append("div");
     return sbubble;
   };
 
@@ -135,7 +136,7 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
   };
 
   var clearBubble = function(bubble) {
-    bubble.selectAll("div").remove();
+    bubble.selectAll("p").remove();
   };
 
   var clearDrawer = function(drawer) {
@@ -144,6 +145,7 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
 
   var drawSequence = function(stage, sbubble, drawer, elephant, sequence,
                               conceal, td, stim_array, callback) {
+    clearBubble(sbubble);
     // this is the callback to checkGuess
     var cb = function() {
       var suffix = setInterval(function() {
@@ -159,7 +161,6 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
       return suffix;
     }
     var prefix = setInterval(function() {
-      clearBubble(sbubble);
       if (sequence.length == conceal) {
         clearInterval(prefix);
         // this callback is interrupt
@@ -180,8 +181,8 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
 
   var drawFreebie = function(stage, sbubble, drawer, elephant,
                              sequence, td, conceal, stim_array) {
+    clearBubble(sbubble);
     var fix = setInterval(function() {
-      clearBubble(sbubble);
       if (_.isEmpty(sequence)) {
         clearInterval(fix);
         td.guess = [];
@@ -197,8 +198,7 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
 
   var drawSyl = function(bubble, syl) {
     var s = syl_code[syl] || " ";
-    bubble.append("div")
-          .append("p")
+    bubble.append("p")
           .text(s);
   };
 
@@ -276,6 +276,9 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
       exp_callback();
     }
   };
+  
+  // var prepBubble(bubble, seq) {
+  //   drawSyl
 
 // 	var finish = function() {
 //     if (!callback) {
@@ -326,7 +329,8 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
 
 	// psiTurk.showPage(stage_page);
   if (practice) {
-    psiTurk.showPage("stage.html");
+    console.log("showing stage, reportedly");
+    psiTurk.showPage("teststage.html");
   }
 
   var mystage      = makeStage();
