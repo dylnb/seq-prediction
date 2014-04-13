@@ -119,14 +119,18 @@ strong {
   text-align: center;
 }
 
+#syl-drawer button {
+  width: 80px;
+}
+
 div.cow {
   float: right;
-  padding-top: 5em;
+  padding-top: 8em;
 }
 
 div.elephant {
   float: left;
-  padding-top: 5em;
+  padding-top: 8em;
 }
 
 .stim div {
@@ -142,13 +146,14 @@ div.elephant {
   vertical-align: middle;
   text-align: center;
   font-size:48px;
-  color: #606388;
+  /* color: #606388; */
+  color: white;
   padding-left: 12px;
 }
 
 .stim {
-  float: left;
-  position: relative;
+  /* float: left; */
+  position: absolute;
   min-width: 175px;
   height: 140px;
   padding: 0px;
@@ -162,12 +167,13 @@ div.elephant {
 
   /* position:relative; */
   /* padding: 0; */
-  margin:1em 0 3em;
-  border:10px solid #606388;
+  margin-left: 10em;
+  /* margin:1em 0 3em; */
+  border:6px solid #606388;
   /* css3 */
-  -webkit-border-radius:20px;
-  -moz-border-radius:20px;
-  border-radius:20px;
+  -webkit-border-radius:40px;
+  -moz-border-radius:40px;
+  border-radius:40px;
 }
 
 /* creates larger curve */
@@ -186,12 +192,12 @@ div.elephant {
   content:"";
   position:absolute;
   z-index:10;
-  bottom:-40px;
-  left:50px;
+  bottom:-36px;
+  left:46px;
   width:50px;
   height:30px;
   border-style:solid;
-  border-width:0 10px 10px 0;
+  border-width:0 6px 6px 0;
   border-color:#606388;
   background:transparent;
   /* css3 */
@@ -218,12 +224,12 @@ div.elephant {
   content:"";
   position:absolute;
   z-index:10;
-  bottom:-40px;
+  bottom:-36px;
   left:50px;
   width:20px;
   height:30px;
   border-style:solid;
-  border-width:0 10px 10px 0;
+  border-width:0 6px 6px 0;
   border-color:#606388;
   background:transparent;
   /* css3 */
@@ -238,15 +244,15 @@ div.elephant {
 .stim > :first-child:before {
   content:"";
   position:absolute;
-  bottom:-52px;
-  left:47px;
-  width:10px;
-  height:10px;
+  bottom:-49px;
+  left:44px;
+  width:6px;
+  height:6px;
   background:#606388;
   /* css3 */
-  -webkit-border-radius:10px;
-  -moz-border-radius:10px;
-  border-radius:10px;
+  -webkit-border-radius:6px;
+  -moz-border-radius:6px;
+  border-radius:6px;
 }
 
 /* creates a white rectangle to cover part of the oval border*/
@@ -264,11 +270,11 @@ div.elephant {
 .response {
   float: right;
   position: relative;
-  width: 175px;
+  min-width: 175px;
   height: 140px;
   padding: 0px;
   margin-right: 2em;
-  margin-top: 9em;
+  margin-top: 12em;
   background: #FFFFFF;
   -webkit-border-radius: 40px;
   -moz-border-radius: 40px;
@@ -277,10 +283,11 @@ div.elephant {
 }
 
 .response div {
-  position: absolute;
+  position: relative;
   display: table;
   height: 90%;
   width: 100%;
+  padding-right: 12px;
 }
 
 .response div p {
@@ -289,6 +296,7 @@ div.elephant {
   text-align: center;
   font-size:48px;
   color: #814700;
+  padding-left: 12px;
 }
 
 .response:after {
@@ -317,6 +325,7 @@ div.elephant {
   top: 51px;
 }
 
-.hidden {
-  display: none;
-}
+
+/* .hidden { */
+/*   display: none; */
+/* } */
