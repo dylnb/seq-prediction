@@ -113,6 +113,11 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
   
   var hideBubble = function(bubble) {
     bubble.classed("hidden", true);
+    bubble.selectAll("p").remove();
+  };
+
+  var clearDrawer = function(drawer) {
+    drawer.selectAll("button").remove();
   };
 
   var showOneSyl = function(bubble) {
@@ -135,7 +140,6 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
           .on("click",
               function(d) {
                 guess.push(d);
-                // clearBubble(rbubble);
                 drawSyl(rbubble, d);
                 if (clicks < conceal - 1) {
                   clicks++;
@@ -144,33 +148,23 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
                   console.log("guess: ");
                   console.log.apply(console, guess);
                   // this callback is basically checkGuess
-                  callback(guess, rbubble);
+                  callback(guess);
                 }
               });
 
   };
 
-  var clearBubble = function(bubble) {
-    bubble.selectAll("p").remove();
-  };
-
-  var clearDrawer = function(drawer) {
-    drawer.selectAll("button").remove();
-  };
-
   var drawSequence = function(stage, sbubble, rbubble, drawer, elephant,
-                              sequence, conceal, td, stim_array, callback) {
-    // clearBubble(sbubble);
-    // _.map(sequence, function(syl) { drawSyl(sbubble, syl); });
-    // this is the callback to checkGuess
+                              sequence, conceal, stim, stim_array) {
+    // this is the callback to checkGuess, which is itself passed in as
+    // callback to interrupt; checkGuess does what it says, and then this
+    // callback "cb" finishes the sequence and launches the next trial
     var cb = function() {
-      // _.map(sequence, function(syl) { drawSyl(sbubble, syl); });
       var suffix = setInterval(function() {
-        // clearBubble(sbubble);
         if (_.isEmpty(sequence)) {
           clearInterval(suffix);
           _.map([rbubble, sbubble],
-                function(b) { hideBubble(b); clearBubble(b); });
+                function(b) { hideBubble(b); });
           clearDrawer(drawer);
           setTimeout(function() {
             doTrial(stage, sbubble, rbubble, drawer,
@@ -179,42 +173,39 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
         } else {
           var syl = sequence.shift();
           showOneSyl(sbubble);
-          // drawSyl(sbubble, syl);
         }
       }, 500);
       return suffix;
     }
+    var inter = 200;
     var prefix = setInterval(function() {
-      if (sequence.length == conceal) {
+      if (stim.inter - inter === 0) {
         clearInterval(prefix);
-        // this callback is interrupt
-        callback(stage, rbubble, drawer, _.range(syl_code.length), conceal,
+        interrupt(stage, rbubble, drawer, _.range(syl_code.length), conceal,
                  function(guess) {
-                   td.guess = guess;
-                   psiTurk.recordTrialData(td);
-                   checkGuess(elephant, sequence, guess, cb);
+                   stim.guess = guess;
+                   psiTurk.recordTrialData(stim);
+                   checkGuess(elephant, sequence.slice(0,conceal), guess, cb);
                  });
       }
       else {
         var syl = sequence.shift();
+        inter = inter + 1;
         showOneSyl(sbubble);
-        // drawSyl(sbubble, syl);
       }
     }, 500);
     return prefix;
   };
 
   var drawFreebie = function(stage, sbubble, rbubble, drawer, elephant,
-                             sequence, td, conceal, stim_array) {
-    // clearBubble(sbubble);
-    // _.map(sequence, function(syl) { drawSyl(sbubble, syl); });
+                             sequence, stim, conceal, stim_array) {
     var fix = setInterval(function() {
       if (_.isEmpty(sequence)) {
         clearInterval(fix);
-        td.guess = [];
-        psiTurk.recordTrialData(td);
+        stim.guess = [];
+        psiTurk.recordTrialData(stim);
         _.map([rbubble, sbubble],
-              function(b) { hideBubble(b); clearBubble(b); });
+              function(b) { hideBubble(b); });
         setTimeout(function() {
           doTrial(stage, sbubble, rbubble, drawer,
                   elephant, conceal, stim_array);
@@ -222,7 +213,6 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
       } else {
         var syl = sequence.shift();
         showOneSyl(sbubble);
-        // drawSyl(sbubble, syl);
       }
     }, 500);
     return fix;
@@ -230,8 +220,8 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
 
   var drawSyl = function(bubble, syl) {
     var s = syl_code[syl] || " ";
-    /* ".white" is a dummy class, just to identify which syls have not yet
-     * been revealed */
+    // ".white" is a dummy class, just to identify which syls have not yet
+    // been revealed
     bubble.select("div")
           .append("p")
           .attr("class", "white")
@@ -247,7 +237,7 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
               .transition().duration(300).attr("transform", "translate(0,0)")
               .transition().duration(300).attr("transform", "translate(0,-50)")
               .transition().duration(300).attr("transform", "translate(0,0)")
-              .each("end", function() { callback(); });
+              .each("end", callback);
     } else {
       var lefteye = elephant.select("#path3163");
       var righteye = elephant.select("#path3161");
@@ -283,7 +273,7 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
          .transition()
          .duration(0)
          .attr("transform", "translate(0,0)")
-         .each("end", function() { callback(); });
+         .each("end", callback);
     }
   };
 
@@ -293,82 +283,26 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
     console.log.apply(console, stim_array);
     if (stim_array.length > 0) {
       var stim = stim_array.shift();
-      var display = stim.display;
-      var sequence = stim.stimlist;
-      var td = {'display': display, 'sequence': sequence};
+      var sequence = stim.sequence;
       _.map(sequence, function(syl) { drawSyl(sbubble, syl); });
       showBubble(sbubble);
-      // clearBubble(sbubble);
-      // clearDrawer(drawer);
-      // drawSyl(sbubble, -1);
       setTimeout(function() {
-        if (display == 1 || sequence.length < 5 ||
-            sequence.length == 5 && Math.random() < 0.5) {
+        if (stim.inter === 200) {
           drawFreebie(stage, sbubble, rbubble, drawer, elephant,
-                      sequence, td, conceal, stim_array);
+                      sequence, stim, conceal, stim_array);
         } else {
+          console.log(stim.inter);
           drawSequence(stage, sbubble, rbubble, drawer, elephant,
-                       sequence, conceal, td, stim_array, interrupt);
+                       sequence, conceal, stim, stim_array);
         }
       }, 2000)
     } else {
       exp_callback();
     }
   };
-  
-  // var prepBubble(bubble, seq) {
-  //   drawSyl
 
-// 	var finish = function() {
-//     if (!callback) {
-//       console.log(stage_page);
-// 	    currentview = new Questionnaire();
-//     } else {
-//       d3.select("#container-exp")
-//         .append("hr");
-
-//       var row = d3.select("#container-exp")
-//         .append("div")
-//         .attr("class", "instructionsnav")
-//         .append("div")
-//         .attr("class", "row");
-
-//       prevbutton = row.append("div")
-//         .attr("class", "col-xs-2")
-//         .append("button")
-//         .attr("type", "button")
-//         .attr("id", "next")
-//         .attr("value", "next")
-//         .attr("class", "btn btn-primary btn-lg previous");
-
-//       prevbutton
-//         .append("span")
-//         .attr("class", "glyphicon glyphicon-arrow-left");
-//       prevbutton
-//         .text("Previous");
-
-//       row.append("div")
-//         .attr("class", "col-xs-8");
-      
-//       nextbutton = row.append("div")
-//         .attr("class", "col-xs-2")
-//         .append("button")
-//         .attr("type", "button")
-//         .attr("id", "next")
-//         .attr("value", "next")
-//         .attr("class", "btn btn-primary btn-lg continue");
-
-//       nextbutton
-//         .text("Next");
-//       nextbutton
-//         .append("span")
-//         .attr("class", "glyphicon glyphicon-arrow-right");
-//     }
-// 	};
-
-	// psiTurk.showPage(stage_page);
   if (practice) {
-    console.log("showing stage, reportedly");
+    console.log("showing teststage");
     psiTurk.showPage("teststage.html");
   }
 
@@ -456,6 +390,11 @@ var Questionnaire = function() {
 
 // Task object to keep track of the current phase
 var currentview;
+// Condition determines grammar type
+// var stimfile = condition === 0 ? "static/data/fsa.csv" : "static/data/cfg.csv";
+var stimfile = "static/data/fsa.csv";
+// Counterbalance determines prediction window
+var hide = counterbalance === 0 ? 1 : 3;
 
 /************
  * RUN TASK *
@@ -464,17 +403,15 @@ $(window).load(function(){
   psiTurk.doInstructions(
     instructionPages, // go through instructions
     function() { // begin experiment
-      var stimfile = condition === 0 ? "static/data/fsa.csv"
-                                     : "static/data/cfg.csv";
-      var hide = counterbalance === 0 ? 1 : 3;
       var stims = [];
       var randstims = [];
       queue()
         .defer(d3.csv, stimfile, function(d) {
+          var inter = _.head(d.Sequence.split(" "));
+          var t = _.tail(d.Sequence.split(" "));
           console.log("starting deferral");
-          var codes = _.map(d.Sequence.split(" "),
-                            function(code) { return (+code - 1); });
-          stims.push(codes);
+          var codes = _.map(t, function(code) { return (+code - 1); });
+          stims.push({inter: +inter, sequence: codes});
         }, function(error, rows) {
           console.log("error");
           console.log.apply(console, stims);
@@ -482,31 +419,25 @@ $(window).load(function(){
         .await(setTimeout(function() {
           console.log("starting awaital");
           var splitStims = _.values(_.groupBy(stims, function(trial) {
-            var l = trial.length;
+            var l = trial.sequence.length;
             if (l < 5) { return "L"; }
-            else if (l == 5) { return "E"; }
+            else if (l === 5) { return "E"; }
             else { return "R"; }
           }));
           var warmups   = _.shuffle(splitStims[0]);
           var fives     = _.shuffle(splitStims[1]);
           var toughies  = _.shuffle(splitStims[2]);
-          var pretrials = _.map(
-            _.shuffle(
-              warmups.slice(0, warmups.length / 2).concat(
-                fives.slice(0, fives.length / 2)
-              )
-            ), function(trial) { return {display: 1, stimlist: trial}; }
+          var pretrials = _.shuffle(
+            warmups.slice(0, warmups.length / 2).concat(
+              fives.slice(0, fives.length / 2)
+            )
           ).slice(0,2);
-          var midtrials = _.map(
-            _.shuffle(
-              warmups.slice(warmups.length / 2).concat(
-                fives.slice(fives.length / 2)
-              )
-            ), function(trial) { return {display: 2, stimlist: trial}; }
+          var midtrials = _.shuffle(
+            warmups.slice(warmups.length / 2).concat(
+              fives.slice(fives.length / 2)
+            )
           ).slice(0,5);
-          var fintrials = _.map(toughies, function(trial) {
-            return {display: 2, stimlist: trial};
-          }).slice(0,5);
+          var fintrials = toughies.slice(0,5);
           randstims = pretrials.concat(midtrials, fintrials);
           console.log("randstims");
           console.log.apply(console, randstims);
