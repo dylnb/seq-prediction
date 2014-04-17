@@ -31,40 +31,30 @@ var instructionPages = [ // demo instructions
 ];
 
 
-/**********************
-* HTML manipulation
-*
-* All HTML files in the templates directory are requested 
-* from the server when the PsiTurk object is created above. We
-* need code to get those pages from the PsiTurk object and 
-* insert them into the document.
-*
-**********************/
-
 /***********************
  * SEQUENCE PREDICTION *
  ***********************/
 var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
 
   var makeStage = function() {
-    var stage = d3.select("#container-exp")
-                  .insert("div", "#instheader")
-                  .attr("id", "stage");
-    return stage;
+    var s = d3.select("#container-exp")
+              .insert("div", "#instheader")
+              .attr("id", "stage");
+    return s;
   };
 
   var makeCow = function(stage) {
-    var cow = stage.append("div")
-                   .attr("class", "cow")
-                   .append("svg")
-                   .attr("width", 200)
-                   .attr("height", 200)
-                   .append("image")
-                   .attr("xlink:href", "static/images/cow.svg")
-                   .attr("width", 200)
-                   .attr("height", 150)
-                   .attr("y", 50);
-    return cow;
+    var c = stage.append("div")
+                 .attr("class", "cow")
+                 .append("svg")
+                 .attr("width", 200)
+                 .attr("height", 200)
+                 .append("image")
+                 .attr("xlink:href", "static/images/cow.svg")
+                 .attr("width", 200)
+                 .attr("height", 150)
+                 .attr("y", 50);
+    return c;
   };
 
   var makeElephant = function(stage) {
@@ -86,25 +76,18 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
     return e;
   };
 
-  var makeStimBubble = function(stage) {
-    var sbubble = stage.append("div")
-                       .attr("class", "hidden stim");
-    sbubble.append("div");
-    return sbubble;
-  };
-
-  var makeResponseBubble = function(stage) {
-    var rbubble = stage.append("div")
-                          .attr("class", "hidden response");
-    rbubble.append("div");
-    return rbubble;
+  var makeBubble = function(stage, bubclass) {
+    var b = stage.append("div")
+                 .attr("class", bubclass + " hidden");
+    b.append("div");
+    return b;
   };
 
   var makeDrawer = function() {
-    var drawer = d3.select("#container-exp")
-                   .insert("div", "#instheader")
-                   .attr("id", "syl-drawer");
-    return drawer;
+    var d = d3.select("#container-exp")
+              .insert("div", "#instheader")
+              .attr("id", "syl-drawer");
+    return d;
   };
 
   var showBubble = function(bubble) {
@@ -120,13 +103,26 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
     drawer.selectAll("button").remove();
   };
 
+  // adds a (hidden) syllable to bubble
+  var drawSyl = function(bubble, syl) {
+    var s = syl_code[syl] || " ";
+    // ".white" is a dummy class, just to identify which syls have not yet
+    // been revealed
+    bubble.select("div")
+          .append("p")
+          .attr("class", "white")
+          .text(s);
+  };
+
+  // reveals the first still-hidden syllable of a bubble
   var showOneSyl = function(bubble) {
     bubble.select(".white")
           .classed("white", false)
           .style("color", "#606388");
   };
 
-  var interrupt = function(stage, rbubble, drawer, syls, conceal, callback) {
+  var interrupt = function(syls, callback) {
+    // the callback here is basically checkGuess
     var clicks = 0;
     var guess = [];
     showBubble(rbubble);
@@ -144,19 +140,17 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
                 if (clicks < conceal - 1) {
                   clicks++;
                 } else {
-                  // rbubble.remove();
                   console.log("guess: ");
                   console.log.apply(console, guess);
-                  // this callback is basically checkGuess
+                  // check the guess, finish the sequence, launch next trial
                   callback(guess);
                 }
               });
 
   };
 
-  var drawSequence = function(stage, sbubble, rbubble, drawer, elephant,
-                              sequence, conceal, stim, stim_array) {
-    // this is the callback to checkGuess, which is itself passed in as
+  var drawSequence = function(sequence, stim, stim_array) {
+    // "cb" below is the callback to checkGuess, which is itself passed in as
     // callback to interrupt; checkGuess does what it says, and then this
     // callback "cb" finishes the sequence and launches the next trial
     var cb = function() {
@@ -166,10 +160,7 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
           _.map([rbubble, sbubble],
                 function(b) { hideBubble(b); });
           clearDrawer(drawer);
-          setTimeout(function() {
-            doTrial(stage, sbubble, rbubble, drawer,
-                    elephant, conceal, stim_array);
-          }, 500);
+          setTimeout(function() { doTrial(stim_array); }, 500);
         } else {
           var syl = sequence.shift();
           showOneSyl(sbubble);
@@ -181,11 +172,11 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
     var prefix = setInterval(function() {
       if (stim.inter - inter === 0) {
         clearInterval(prefix);
-        interrupt(stage, rbubble, drawer, _.range(syl_code.length), conceal,
+        interrupt(_.range(syl_code.length),
                  function(guess) {
                    stim.guess = guess;
                    psiTurk.recordTrialData(stim);
-                   checkGuess(elephant, sequence.slice(0,conceal), guess, cb);
+                   checkGuess(sequence, guess, cb);
                  });
       }
       else {
@@ -197,8 +188,7 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
     return prefix;
   };
 
-  var drawFreebie = function(stage, sbubble, rbubble, drawer, elephant,
-                             sequence, stim, conceal, stim_array) {
+  var drawFreebie = function(sequence, stim, stim_array) {
     var fix = setInterval(function() {
       if (_.isEmpty(sequence)) {
         clearInterval(fix);
@@ -207,8 +197,7 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
         _.map([rbubble, sbubble],
               function(b) { hideBubble(b); });
         setTimeout(function() {
-          doTrial(stage, sbubble, rbubble, drawer,
-                  elephant, conceal, stim_array);
+          doTrial(stim_array);
         }, 500);
       } else {
         var syl = sequence.shift();
@@ -218,18 +207,9 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
     return fix;
   };
 
-  var drawSyl = function(bubble, syl) {
-    var s = syl_code[syl] || " ";
-    // ".white" is a dummy class, just to identify which syls have not yet
-    // been revealed
-    bubble.select("div")
-          .append("p")
-          .attr("class", "white")
-          .text(s);
-  };
-
-  var checkGuess = function(elephant, correct, guess, callback) {
+  var checkGuess = function(sequence, guess, callback) {
     // callback here finishes the sequence, then starts next trial
+    var correct = sequence.slice(0, conceal);
     console.log("correct: ");
     console.log.apply(console, correct);
     if (_.isEqual(correct, guess)) {
@@ -277,8 +257,7 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
     }
   };
 
-  var doTrial = function(stage, sbubble, rbubble, drawer,
-                         elephant, conceal, stim_array) {
+  var doTrial = function(stim_array) {
     console.log("stim_array: ");
     console.log.apply(console, stim_array);
     if (stim_array.length > 0) {
@@ -288,12 +267,11 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
       showBubble(sbubble);
       setTimeout(function() {
         if (stim.inter === 200) {
-          drawFreebie(stage, sbubble, rbubble, drawer, elephant,
-                      sequence, stim, conceal, stim_array);
+          drawFreebie(sequence, stim, stim_array);
         } else {
+          console.log("inter:");
           console.log(stim.inter);
-          drawSequence(stage, sbubble, rbubble, drawer, elephant,
-                       sequence, conceal, stim, stim_array);
+          drawSequence(sequence, stim, stim_array);
         }
       }, 2000)
     } else {
@@ -301,28 +279,27 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
     }
   };
 
-  if (practice) {
+  if (! practice) { // 
     console.log("showing teststage");
     psiTurk.showPage("teststage.html");
   }
 
-  var mystage      = makeStage();
-  var myelephant   = makeElephant(mystage);
-  var mycow        = makeCow(mystage);
-  var mystimbubble = makeStimBubble(mystage);
-  var myrespbubble = makeResponseBubble(mystage);
-  var mydrawer     = makeDrawer();
-  var myconceal    = conceal_number;
+  var stage    = makeStage();
+  var elephant = makeElephant(stage);
+  var cow      = makeCow(stage);
+  var sbubble  = makeBubble(stage, "stim");
+  var rbubble  = makeBubble(stage, "response");
+  var drawer   = makeDrawer();
 
   var syl_code    = ["wao", "yai", "piu", "shin", "bam", "fei", "ti", "ra", "ki"];
   var syl_choices = syl_code;
+  var conceal     = conceal_number;
   var mytrials    = stimuli;
 
   setTimeout(function() {
-    console.log("conceal: " + myconceal);
+    console.log("conceal: " + conceal);
     console.log.apply(console, mytrials);
-    doTrial(mystage, mystimbubble, myrespbubble, mydrawer,
-            myelephant, myconceal, mytrials);
+    doTrial(mytrials);
   }, 1000);
 
 };
@@ -441,10 +418,12 @@ $(window).load(function(){
           randstims = pretrials.concat(midtrials, fintrials);
           console.log("randstims");
           console.log.apply(console, randstims);
-          currentview = new SeqPredict(randstims, hide, true,
-                                       function() {
-                                         currentview = new Questionnaire();
-                                       });
+          currentview = new SeqPredict(
+            randstims,
+            hide,
+            false,
+            function() { currentview = new Questionnaire(); }
+          );
         }, 1000));
   });
 });
