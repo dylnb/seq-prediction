@@ -34,7 +34,7 @@ var instructionPages = [ // demo instructions
 /***********************
  * SEQUENCE PREDICTION *
  ***********************/
-var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
+var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
 
   var makeStage = function() {
     var s = d3.select("#container-exp")
@@ -69,7 +69,7 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
                  .attr("id", "elephant");
     d3.xml("static/images/elephant.svg", "image/svg+xml", function(xml) {
       var importedNode = document.importNode(xml.documentElement, true);
-      importedNode.x.baseVal.value = 87;
+      importedNode.x.baseVal.value = 43;
       importedNode.y.baseVal.value = 95;
       e.node().appendChild(importedNode);
     });
@@ -157,8 +157,7 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
       var suffix = setInterval(function() {
         if (_.isEmpty(sequence)) {
           clearInterval(suffix);
-          _.map([rbubble, sbubble],
-                function(b) { hideBubble(b); });
+          _.each([rbubble, sbubble], hideBubble);
           clearDrawer(drawer);
           setTimeout(function() { doTrial(stim_array); }, 500);
         } else {
@@ -194,8 +193,7 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
         clearInterval(fix);
         stim.guess = [];
         psiTurk.recordTrialData(stim);
-        _.map([rbubble, sbubble],
-              function(b) { hideBubble(b); });
+        _.each([rbubble, sbubble], hideBubble);
         setTimeout(function() {
           doTrial(stim_array);
         }, 500);
@@ -263,7 +261,7 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
     if (stim_array.length > 0) {
       var stim = stim_array.shift();
       var sequence = stim.sequence;
-      _.map(sequence, function(syl) { drawSyl(sbubble, syl); });
+      _.each(sequence, _.partial(drawSyl, sbubble));
       showBubble(sbubble);
       setTimeout(function() {
         if (stim.inter === 200) {
@@ -279,7 +277,8 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
     }
   };
 
-  if (! practice) { // 
+  if (! practice_run) {
+    // it's the real experiment; clear the window and prep the test stage
     console.log("showing teststage");
     psiTurk.showPage("teststage.html");
   }
@@ -293,7 +292,7 @@ var SeqPredict = function(stimuli, conceal_number, practice, exp_callback) {
 
   var syl_code    = ["wao", "yai", "piu", "shin", "bam", "fei", "ti", "ra", "ki"];
   var syl_choices = syl_code;
-  var conceal     = conceal_number;
+  var conceal     = pred_window;
   var mytrials    = stimuli;
 
   setTimeout(function() {
@@ -367,11 +366,10 @@ var Questionnaire = function() {
 
 // Task object to keep track of the current phase
 var currentview;
-// Condition determines grammar type
-// var stimfile = condition === 0 ? "static/data/fsa.csv" : "static/data/cfg.csv";
-var stimfile = "static/data/fsa.csv";
-// Counterbalance determines prediction window
-var hide = counterbalance === 0 ? 1 : 3;
+// // Condition determines grammar type
+// var stimfile = condition === 0 ? "static/data/fsa_grammar.csv"
+//                                : "static/data/cfg_grammar.csv";
+var stimfile = "static/data/fsa_grammar.csv";
 
 /************
  * RUN TASK *
@@ -384,11 +382,20 @@ $(window).load(function(){
       var randstims = [];
       queue()
         .defer(d3.csv, stimfile, function(d) {
-          var inter = _.head(d.Sequence.split(" "));
-          var t = _.tail(d.Sequence.split(" "));
-          console.log("starting deferral");
-          var codes = _.map(t, function(code) { return (+code - 1); });
-          stims.push({inter: +inter, sequence: codes});
+          // // first number identifies interruption point
+          // var inter = _.head(d.Sequence.split(" "));
+          // // next numbers code for a particular sequence of syllables
+          // var t = _.tail(d.Sequence.split(" "));
+          // console.log("starting deferral");
+          // var codes = _.map(t, function(code) { return (+code - 1); });
+          // // add a stimulus (an interruption point and a syl sequence)
+          // // to the trial list
+          // stims.push({inter: +inter, sequence: codes});
+          var codes = _.map(
+            d.Sequence.split(" "),
+            function(code) { return (+code - 1); }
+          );
+          stims.push({inter: 200, sequence: codes});
         }, function(error, rows) {
           console.log("error");
           console.log.apply(console, stims);
@@ -401,28 +408,56 @@ $(window).load(function(){
             else if (l === 5) { return "E"; }
             else { return "R"; }
           }));
-          var warmups   = _.shuffle(splitStims[0]);
-          var fives     = _.shuffle(splitStims[1]);
-          var toughies  = _.shuffle(splitStims[2]);
+
+          var warmups   = splitStims[0];
+          var fives     = splitStims[1];
+
           var pretrials = _.shuffle(
             warmups.slice(0, warmups.length / 2).concat(
               fives.slice(0, fives.length / 2)
             )
           ).slice(0,2);
+
           var midtrials = _.shuffle(
             warmups.slice(warmups.length / 2).concat(
-              fives.slice(fives.length / 2)
+              fives.slice(fives.length / 2, 3 * fives.length / 4),
+              _.map(
+                fives.slice(3 * fives.length / 4),
+                function(s) { s.inter = 202; return s; }
+              )
             )
           ).slice(0,5);
-          var fintrials = toughies.slice(0,5);
+
+          var toughgroups = _.groupBy(
+            splitStims[2],
+            function(trial) { return trial.sequence.length; }
+          );
+          var inter_columns = []
+          _.each(toughgroups, function(value, key) {
+            var n = key;
+            var n_yield = value.length;
+            var int_points = _.range(200 + Math.floor(n/2), 200 + (n-2));
+            var b = [];
+            for (i = 0; i < n_yield; i++) {
+              b.push(int_points[i % int_points.length]);
+            }
+            inter_columns.push(b);
+          });
+          var toughies = _.zip(
+            _.flatten(inter_columns),
+            _.sortBy(splitStims[2], function(trial) { return trial.sequence.length; })
+          ).map(function(ht) { return {inter: ht[0], sequence: ht[1].sequence}; });
+
+          var fintrials = _.shuffle(toughies).slice(0,5);
+
           randstims = pretrials.concat(midtrials, fintrials);
           console.log("randstims");
           console.log.apply(console, randstims);
           currentview = new SeqPredict(
-            randstims,
-            hide,
-            false,
-            function() { currentview = new Questionnaire(); }
+            randstims, // trial data
+            counterbalance === 0 ? 1 : 3, // prediction window
+            false, // real experiment; not practice
+            function() { currentview = new Questionnaire(); } // post-exp
           );
         }, 1000));
   });
