@@ -107,7 +107,7 @@ sampsizes = [4, 16, 12, 15, 23, 30, 34, 26, 17, 8, 5]
 main = do
   xss <- sequence $ zipWith pickN sampsizes (grp fsastims)
   let stims = concat (map (map unwords) xss)
-  writeFile "fsa_test.csv" $ unlines ("Sequence":stims)
+  writeFile "fsa_grammar.csv" $ unlines ("Sequence":stims)
 
 -- main = do
 --   cfg <- readFile "cfg.csv"
@@ -122,13 +122,13 @@ main = do
 --   writeFile "cfg_ns.csv" $ unlines ("Sequence":cfgstims)
 
 -- main = do
---   cfg <- readFile "cfg.csv"
+--   cfg <- readFile "cfg_rohr_LC.csv"
 --   let stims = tail . lines $ cfg
 --   cfgstims <- mapM replaceNNs stims
 --   writeFile "cfg_nns.csv" $ unlines ("Sequence":cfgstims)
 
 -- main = do
---   cfg <- readFile "cfg_nns.csv"
+--   cfg <- readFile "cfg_grammar.csv"
 --   let cfgstims = org $ tail . lines $ cfg
 --   let fsadist = map (\xss -> (length (head xss), fromIntegral (length xss))) $
 --                     grp fsastims
