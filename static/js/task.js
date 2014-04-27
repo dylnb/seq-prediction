@@ -166,7 +166,7 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
         }
       }, 500);
       return suffix;
-    }
+    };
     var inter = 200;
     var prefix = setInterval(function() {
       if (stim.inter - inter === 0) {

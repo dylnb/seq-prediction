@@ -13,7 +13,7 @@
     </p>
     <div id="democontainer" style="overflow: hidden;">
       <div id="demostage" style="overflow: auto; padding-bottom: 1.6em;">
-        <div class="elephant" style="padding-top: 7em">
+        <div class="elephant" style="padding-top: 7em;">
           <svg width=160 height=160>
             <image xlink:href="static/images/elephant.svg"
               width=120 height=120 y=40 />
@@ -58,7 +58,6 @@
     </div>
   </div>
   <script type="text/javascript">
-    var demo_syl_code = ["wao", "yai", "piu", "shin", "bam", "fei", "ti", "ra", "ki"];
     var demodrawsyl = function(bubble, syl) {
       var s = demo_syl_code[syl] || " ";
       bubble.select("div")
@@ -123,12 +122,13 @@
     var sbubble = d3.select(".stim");
     var rbubble = d3.select(".response");
     var conceal = 3;
+    var demo_syl_code = ["wao", "yai", "piu", "shin", "bam", "fei", "ti", "ra", "ki"];
     el.on("click", function() {
       setTimeout(function() {
         var seq = [1,2,3,2,1,2,3];
         _.each(seq, _.partial(demodrawsyl, sbubble));
         demoshowbubble(sbubble);
-        dodemosequence([1,2,3,2,1,2,3]);
+        dodemosequence(seq);
       }, 500)
     });
   </script>
