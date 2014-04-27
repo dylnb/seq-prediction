@@ -19,7 +19,8 @@
             width="160" height="120" y=40 />
         </svg>
       </div>
-      <div class="stim" style="margin-left: 0; margin-top: 0;">
+      <div class="stim inst-stim hidden">
+        <div> </div>
       </div>
     </div>
   </div>
@@ -38,7 +39,7 @@
         <button type="button"
           id="next"
           value="next"
-          class="btn btn-primary btn-lg continue">
+          class="btn btn-primary btn-lg continue pull-right">
           Next <span class="glyphicon glyphicon-arrow-right"></span>
         </button>
       </div>
@@ -46,43 +47,52 @@
   </div>
   <script type="text/javascript">
     var demo_syl_code = ["wao", "yai", "piu", "shin", "bam", "fei", "ti", "ra", "ki"];
-    var demosyl = function(bubble, syl) {
+    var demodrawsyl = function(bubble, syl) {
       var s = demo_syl_code[syl] || " ";
-      bubble.append("div")
+      bubble.select("div")
             .append("p")
+            .attr("class", "white")
             .text(s);
     };
-    var democlear = function(bubble) {
-      bubble.selectAll("div").remove();
+    var demoshowsyl = function(bubble) {
+      bubble.select(".white")
+            .classed("white", false)
+            .style("color", "#606388");
     };
-    var demofreebie = function(bubble, elephant, sequence, stim_array) {
+    var demoshowbubble = function(bubble) {
+      bubble.classed("hidden", false);
+    };
+    var demohidebubble = function(bubble) {
+      bubble.classed("hidden", true);
+      bubble.selectAll("p").remove();
+    };
+    var demofreebie = function(sequence, stim_array) {
       var fix = setInterval(function() {
-        democlear(bubble);
         if (_.isEmpty(sequence)) {
           clearInterval(fix);
-          doDemo(bubble, elephant, stim_array);
+          demohidebubble(sbubble);
+          setTimeout(function() { dodemo(stim_array); }, 500)
         } else {
           var syl = sequence.shift();
-          demosyl(bubble, syl);
+          demoshowsyl(sbubble);
         }
-      }, 250);
+      }, 500);
       return fix;
     };
-    var doDemo = function(bubble, elephant, stim_array) {
+    var dodemo = function(stim_array) {
       if (stim_array.length > 0) {
         var sequence = stim_array.shift();
-        democlear(bubble);
-        /* clearDrawer(drawer); */
-        demosyl(bubble, -1);
+        _.each(sequence, _.partial(demodrawsyl, sbubble));
+        demoshowbubble(sbubble);
         setTimeout(function() {
-          demofreebie(bubble, elephant, sequence, stim_array);
+          demofreebie(sequence, stim_array);
         }, 500);
       }
     };
     var el = d3.select(".elephant");
-    var sb = d3.select(".stim");
+    var sbubble = d3.select(".stim");
     el.on("click", function() {
-      doDemo(sb, el, [[0,1,2,3], [2,1,3,0]]);
+        dodemo([[0,1,2,3,4], [1,3,0]]);
     });
   </script>
 </div>

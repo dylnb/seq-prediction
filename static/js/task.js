@@ -9,11 +9,11 @@ var psiTurk = PsiTurk(uniqueId, adServerLoc);
 
 // All pages loaded in course of experiment
 var pages = [
-	// "instructions/instruct-1.html",
-	// "instructions/instruct-2.html",
-	// "instructions/instruct-3.html",
-  // "instructions/instruct-4.html",
-  // "instructions/instruct-5.html",
+	"instructions/instruct-1.html",
+	"instructions/instruct-2.html",
+	"instructions/instruct-3.html",
+  "instructions/instruct-4.html",
+  "instructions/instruct-5.html",
 	"instructions/instruct-ready.html",
   "teststage.html",
 	"postquestionnaire.html"
@@ -22,11 +22,11 @@ var pages = [
 psiTurk.preloadPages(pages);
 
 var instructionPages = [ // demo instructions
-	// "instructions/instruct-1.html",
-	// "instructions/instruct-2.html",
-	// "instructions/instruct-3.html",
-  // "instructions/instruct-4.html",
-  // "instructions/instruct-5.html",
+	"instructions/instruct-1.html",
+	"instructions/instruct-2.html",
+	"instructions/instruct-3.html",
+  "instructions/instruct-4.html",
+  "instructions/instruct-5.html",
 	"instructions/instruct-ready.html"
 ];
 
