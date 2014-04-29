@@ -1,19 +1,30 @@
 <div id="container-instructions">
-  <h1>Instructions</h1>
+  <h1>
+    Instructions
+    <button type="button" id="next" value="next" disabled
+      class="btn btn-primary btn-lg continue pull-right">
+      Next <span class="glyphicon glyphicon-arrow-right"></span>
+    </button>
+    <button type="button" id="next" value="next" disabled
+      class="btn btn-primary btn-lg previous pull-right">
+      <span class="glyphicon glyphicon-arrow-left"></span> Previous 
+    </button>
+  </h1>
   <hr>
   <div class="instructions well">
     <p>
     After you select the words that you think complete the elephant's thought,
     the elephant will react. Like all elephants, it enjoys being understood,
     and resents being misunderstood. So if you correctly identify the
-    remainder of the sentence, you'll see the elephant jump up and down in
-    joy, but if you incorrectly identify the remainder of the sentence, you'll
-    see the elephant's eyes roll in agitation. Either way, the elephant will
-    finish its own sentence the way it intended to all along. Click the
-    elphant below to see a sentence. When you interrupt, select "pa", "bo",
-    "gu" to see the elephant's reaction to a sypathetic continuation. Then
-    click the elephant once more, but this time when you interrupt, select
-    "gu", "bo", "pa" to see an unsympathetic reaction.
+    remainder of the sentence, you'll see the elephant jump up and down;
+    otherwise, you'll see its eyes roll. Either way, the elephant will
+    finish its own sentence the way it intended all along.
+    </p>
+    <p>
+    Click either character below to see a sentence. When you interrupt, select
+    "pa", "bo", "gu" to see the elephant react positively. Then click either
+    character again to start the trial over, but this time when you interrupt,
+    select "gu", "bo", "pa" to see the elephant react negatively.
     </p>
     <div id="democontainer" style="overflow: hidden;">
       <div id="demostage" style="overflow: auto; padding-bottom: 4.6em;">
@@ -34,25 +45,25 @@
       </div>
     </div>
   </div>
-  <hr>
-  <div class="instructionsnav">
-    <div class="row">
-      <div class="col-xs-2">
-        <button type="button" id="next" value="next"
-          class="btn btn-primary btn-lg previous">
-          <span class="glyphicon glyphicon-arrow-left"></span> Previous
-        </button>
-      </div>
-      <div class="col-xs-8">
-      </div>
-      <div class="col-xs-2">
-        <button type="button" id="next" value="next"
-          class="btn btn-primary btn-lg continue pull-right">
-          Next <span class="glyphicon glyphicon-arrow-right"></span>
-        </button>
-      </div>
-    </div>
-  </div>
+  <!-- <hr> -->
+  <!-- <div class="instructionsnav"> -->
+  <!--   <div class="row"> -->
+  <!--     <div class="col-xs-2"> -->
+  <!--       <button type="button" id="next" value="next" -->
+  <!--         class="btn btn-primary btn-lg previous"> -->
+  <!--         <span class="glyphicon glyphicon-arrow-left"></span> Previous -->
+  <!--       </button> -->
+  <!--     </div> -->
+  <!--     <div class="col-xs-8"> -->
+  <!--     </div> -->
+  <!--     <div class="col-xs-2"> -->
+  <!--       <button type="button" id="next" value="next" -->
+  <!--         class="btn btn-primary btn-lg continue pull-right"> -->
+  <!--         Next <span class="glyphicon glyphicon-arrow-right"></span> -->
+  <!--       </button> -->
+  <!--     </div> -->
+  <!--   </div> -->
+  <!-- </div> -->
   <!-- <script src="/static/lib/d3-min.js" type="text/javascript"> </script> -->
   <script type="text/javascript">
     var demodrawsyl = function(bubble, syl) {
@@ -151,7 +162,7 @@
            .transition()
            .duration(0)
            .attr("transform", "translate(0,0)")
-           .each("end", callback);
+           .each("end", function() { done = true; callback(); });
       }
     };
     var dodemosequence = function(sequence) {
@@ -163,6 +174,7 @@
             demohidedrawer(demodrawer);
             d3.select("#demostage")
               .style("padding-bottom", "4.6em");
+            if (done) { d3.selectAll("#next").property("disabled", false); }
           } else {
             var syl = sequence.shift();
             demoshowsyl(sbubble);
@@ -207,6 +219,7 @@
     var conceal = 3;
     var demo_syl_code = ["wao", "yai", "piu", "shin", "bam", "fei", "ti", "ra", "ki"];
     var demodrawer = d3.select("#syl-drawer");
+    var done = false;
     el.on("click", function() {
       demohidebubble(sbubble);
       demohidebubble(rbubble);

@@ -367,8 +367,8 @@ var Questionnaire = function() {
 // Task object to keep track of the current phase
 var currentview;
 // // Condition determines grammar type
-// var stimfile = condition === 0 ? "static/data/fsa_grammar.csv"
-//                                : "static/data/cfg_grammar.csv";
+// var stimfile = condition === "0" ? "static/data/fsa_grammar.csv"
+//                                  : "static/data/cfg_grammar.csv";
 var stimfile = "static/data/fsa_grammar.csv";
 
 /************
@@ -455,7 +455,7 @@ $(window).load(function(){
           console.log.apply(console, randstims);
           currentview = new SeqPredict(
             randstims, // trial data
-            counterbalance === 0 ? 1 : 3, // prediction window
+            counterbalance === "0" ? 1 : 3, // prediction window
             false, // real experiment; not practice
             function() { currentview = new Questionnaire(); } // post-exp
           );

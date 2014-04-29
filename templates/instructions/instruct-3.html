@@ -1,15 +1,25 @@
 <div id="container-instructions">
-  <h1>Instructions</h1>
+  <h1>
+    Instructions
+    <button type="button" id="next" value="next" disabled
+      class="btn btn-primary btn-lg continue pull-right">
+      Next <span class="glyphicon glyphicon-arrow-right"></span>
+    </button>
+    <button type="button" id="next" value="next" disabled
+      class="btn btn-primary btn-lg previous pull-right">
+      <span class="glyphicon glyphicon-arrow-left"></span> Previous 
+    </button>
+  </h1>
   <hr>
   <div class="instructions well">
     <p>
     As it happens, you, the cow, are rather excitable. In fact, every so often
     you get so excited you will find yourself anticipating what the elephant
     is going to say. When this happens, you will see a speech bubble emerge
-    from the cow, indicating that you have just interrupted the elephant
-    mid-sentence. Your goal is to finish the elephant's sentences correctly,
-    exactly as the elephant intends to utter them. Click either character
-    below to see what it will look like when you interrupt.
+    from the cow's mouth, indicating that you have just interrupted the
+    elephant mid-sentence. Your goal is to finish the elephant's sentences
+    correctly, exactly as you think the elephant intends to utter them. Click
+    either character below to see what it will look like when you interrupt.
     </p>
     <div id="democontainer" style="overflow: hidden;">
       <div id="demostage" style="overflow: auto; padding-bottom: 1.6em;">
@@ -33,30 +43,26 @@
         </div>
       </div>
     </div>
-    <p>
-    Every time you interrupt, you will be presented with a number of possible
-    continuations. Click whichever button you think corresponds to the words
-    that the elphant will say next. Give it a try.
   </div>
-  <hr>
-  <div class="instructionsnav">
-    <div class="row">
-      <div class="col-xs-2">
-        <button type="button" id="next" value="next"
-          class="btn btn-primary btn-lg previous">
-          <span class="glyphicon glyphicon-arrow-left"></span> Previous
-        </button>
-      </div>
-      <div class="col-xs-8">
-      </div>
-      <div class="col-xs-2">
-        <button type="button" id="next" value="next"
-          class="btn btn-primary btn-lg continue pull-right">
-          Next <span class="glyphicon glyphicon-arrow-right"></span>
-        </button>
-      </div>
-    </div>
-  </div>
+  <!-- <hr> -->
+  <!-- <div class="instructionsnav"> -->
+  <!--   <div class="row"> -->
+  <!--     <div class="col-xs-2"> -->
+  <!--       <button type="button" id="next" value="next" -->
+  <!--         class="btn btn-primary btn-lg previous"> -->
+  <!--         <span class="glyphicon glyphicon-arrow-left"></span> Previous -->
+  <!--       </button> -->
+  <!--     </div> -->
+  <!--     <div class="col-xs-8"> -->
+  <!--     </div> -->
+  <!--     <div class="col-xs-2"> -->
+  <!--       <button type="button" id="next" value="next" -->
+  <!--         class="btn btn-primary btn-lg continue pull-right"> -->
+  <!--         Next <span class="glyphicon glyphicon-arrow-right"></span> -->
+  <!--       </button> -->
+  <!--     </div> -->
+  <!--   </div> -->
+  <!-- </div> -->
   <script type="text/javascript">
     var demodrawsyl = function(bubble, syl) {
       var s = demo_syl_code[syl] || " ";
@@ -99,8 +105,19 @@
                       } else {
                         demodrawer.selectAll("button")
                                   .property("disabled", true);
+                        d3.selectAll("#next")
+                          .property("disabled", false);
                       }
                     });
+      d3.select("#democontainer")
+        .append("p")
+        .text(
+          [ "Every time you interrupt, you will be presented with a number",
+            "of possible continuations. Click whichever button you think",
+            "corresponds to the words that the elphant will say next.",
+            "Give it a try."
+          ].join(" ")
+        );
     };
     var dodemosequence = function(sequence) {
       var inter = 200;

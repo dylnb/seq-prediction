@@ -25,6 +25,11 @@ strong {
   color: #ccccff;
 }
 
+h1 button {
+  width: 135px;
+  margin-left: 20px;
+}
+
 /* these are all the same for now, but easy to modify individually */
 #container-ad,
 #container-error,
@@ -38,8 +43,8 @@ strong {
   bottom: 0px; /* Footer Height */
   left: 0px;
   right: 0px;
-  padding: 50px;
-  padding-top: 2%;
+  padding: 1% 50px;
+  /* padding-top: 2%; */
   border: 18px solid #f3f3f3;
   background: white;
 }
@@ -162,6 +167,7 @@ div.elephant {
   /* color: #606388; */
   color: rgba(255,255,255, 0);
   padding-left: 12px;
+  font-weight: normal;
 }
 
 /* creates larger curve */
