@@ -11,14 +11,15 @@
     </button>
   </h1>
   <hr>
-  <div class="instructions well">
+  <div class="well">
+ <!--
     <p>
     After you select the words that you think complete the elephant's thought,
-    the elephant will react. Like all elephants, it enjoys being understood,
-    and resents being misunderstood. So if you correctly identify the
-    remainder of the sentence, you'll see the elephant jump up and down;
-    otherwise, you'll see its eyes roll. Either way, the elephant will
-    finish its own sentence the way it intended all along.
+    the elephant will react. Unsurprisingly, this elephant enjoys being
+    understood, and resents being misunderstood. So if you correctly identify
+    the remainder of the sentence, you'll see the elephant jump up and down;
+    otherwise, you'll see its eyes roll. Either way, the elephant will finish
+    its own sentence the way it intended all along.
     </p>
     <p>
     Click either character below to see a sentence. When you interrupt, select
@@ -26,6 +27,7 @@
     character again to start the trial over, but this time when you interrupt,
     select "gu", "bo", "pa" to see the elephant react negatively.
     </p>
+ -->
     <div id="democontainer" style="overflow: hidden;">
       <div id="demostage" style="overflow: auto; padding-bottom: 4.6em;">
         <div class="cow" style="padding-top: 7em;">
@@ -66,6 +68,37 @@
   <!-- </div> -->
   <!-- <script src="/static/lib/d3-min.js" type="text/javascript"> </script> -->
   <script type="text/javascript">
+    d3.select(".well")
+      .insert("p", "#democontainer")
+      .text(
+        [ 
+          "After you select the",
+          condition === "0" ? "word" : "words",
+          "that you think will come next, the elephant will react.",
+          "Unsurprisingly, this elephant enjoys being understood,",
+          "and resents being misunderstood. So if",
+          "you correctly identify the next bit of the sentence, you'll see",
+          "the elephant jump up and down; otherwise, you'll see its eyes",
+          "roll. Either way, the elephant will finish its own sentence the",
+          "way it intended all along."
+        ].join(" ")
+      );
+
+    d3.select(".well")
+      .insert("p", "#democontainer")
+      .text(
+        [
+          "Click either character below to see a sentence. When you",
+          "interrupt, select",
+          counterbalance === "0" ? "'pa'" : "'pa', 'bo', 'gu'",
+          "to see the elephant react positively.",
+          "Then click either character again to start the trial",
+          "over, but this time when you interrupt, select",
+          counterbalance === "0" ? "'bo'" : "'gu', 'bo', 'pa'",
+          "to see the elephant react negatively."
+        ].join(" ")
+      );
+
     var demodrawsyl = function(bubble, syl) {
       var s = demo_syl_code[syl] || " ";
       bubble.select("div")
@@ -214,6 +247,7 @@
       importedNode.y.baseVal.value = 95;
       el.node().appendChild(importedNode);
     });
+    var cow = d3.select(".cow");
     var sbubble = d3.select(".stim");
     var rbubble = d3.select(".response");
     var conceal = 3;
@@ -221,6 +255,17 @@
     var demodrawer = d3.select("#syl-drawer");
     var done = false;
     el.on("click", function() {
+      demohidebubble(sbubble);
+      demohidebubble(rbubble);
+      demohidedrawer(demodrawer);
+      setTimeout(function() {
+        seq = [1,2,3,2,1,2,3];
+        _.each(seq, _.partial(demodrawsyl, sbubble));
+        demoshowbubble(sbubble);
+        dodemosequence(seq);
+      }, 500)
+    });
+    cow.on("click", function() {
       demohidebubble(sbubble);
       demohidebubble(rbubble);
       demohidedrawer(demodrawer);

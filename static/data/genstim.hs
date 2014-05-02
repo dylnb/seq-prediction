@@ -14,7 +14,7 @@ data Cat = NT [[Cat]] | T [String]
 
 -- defines the nonterminals
 s, vp, vp', np, pp :: Cat
--- S -> NP VP
+-- S -> NP VP'
 s   = NT [[np, vp']]
 -- VP' -> VP | VP PP
 vp' = NT [[vp], [vp, pp]]
@@ -102,21 +102,37 @@ replaceNNs ss = do
                                         else pick [[s,"10"], [s]]
   liftM (unwords . concat) xs
 
+replaceDs :: String -> String
+replaceDs ss = unwords newsplits
+  where splits = words ss
+        newsplits = [splits!!0, splits!!1] ++ reps
+        reps = do n <- [2..length splits - 1]
+                  let [x,y,z] = [splits!!(n-2), splits!!(n-1), splits!!n]
+                  if (x == "9" && z == "10")
+                    then return "11"
+                    else return z
+
 sampsizes = [4, 16, 12, 15, 23, 30, 34, 26, 17, 8, 5]
 
+-- main = do
+--   xss <- sequence $ zipWith pickN sampsizes (grp fsastims)
+--   let stims = concat (map (map unwords) xss)
+--   writeFile "fsa_grammar.csv" $ unlines ("Sequence":stims)
+
 main = do
-  xss <- sequence $ zipWith pickN sampsizes (grp fsastims)
-  let stims = concat (map (map unwords) xss)
-  writeFile "fsa_grammar.csv" $ unlines ("Sequence":stims)
+  cfg <- readFile "cfg_grammar.csv"
+  let stims = tail . lines $ cfg
+  let cfgstims = map replaceDs stims
+  writeFile "cfg_ds.csv" $ unlines ("Sequence":cfgstims)
 
 -- main = do
---   cfg <- readFile "cfg.csv"
+--   cfg <- readFile "cfg_rohr_LC.csv"
 --   let stims = tail . lines $ cfg
 --   cfgstims <- mapM replaceVs stims
 --   writeFile "cfg_vs.csv" $ unlines ("Sequence":cfgstims)
 
 -- main = do
---   cfg <- readFile "cfg.csv"
+--   cfg <- readFile "cfg_rohr_LC.csv"
 --   let stims = tail . lines $ cfg
 --   let cfgstims = map replaceNs stims
 --   writeFile "cfg_ns.csv" $ unlines ("Sequence":cfgstims)

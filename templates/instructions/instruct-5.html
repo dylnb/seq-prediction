@@ -1,16 +1,18 @@
 <div id="container-exp">
-  <h1>
-    Practice
-    <button type="button" id="next" value="next"
-      class="btn btn-primary btn-lg continue pull-right hidden">
-      Next <span class="glyphicon glyphicon-arrow-right"></span>
-    </button>
-    <button type="button" id="next" value="next"
-      class="btn btn-primary btn-lg previous pull-right hidden">
-      <span class="glyphicon glyphicon-arrow-left"></span> Previous 
-    </button>
-  </h1>
-  <hr>
+  <div style="padding: 0 50px">
+    <h1>
+      Practice
+      <button type="button" id="next" value="next"
+        class="btn btn-primary btn-lg continue pull-right hidden">
+        Next <span class="glyphicon glyphicon-arrow-right"></span>
+      </button>
+      <button type="button" id="next" value="next"
+        class="btn btn-primary btn-lg previous pull-right hidden">
+        <span class="glyphicon glyphicon-arrow-left"></span> Previous 
+      </button>
+    </h1>
+    <hr>
+  </div>
 
   <!-- prediction here -->
 
@@ -39,16 +41,13 @@
                                              : "static/data/practicecfg.csv";
     var stims = [];
     queue()
-      .defer(d3.csv, practicestimfile, function(d) {
+      .defer(d3.csv, practicestimfile, function(d) { // first load data
         console.log("starting deferral");
         var codes = _.map(d.Sequence.split(" "),
                           function(code) { return (+code - 1); });
         stims.push({inter: 200, sequence: codes});
-      }, function(error, rows) {
-        console.log("error");
-        console.log.apply(console, stims);
       })
-      .await(setTimeout(function() {
+      .await(function(error) { // then begin practice task
         console.log("starting awaital");
         var practicestims = stims.slice(0,5);
         console.log("practicestims");
@@ -60,6 +59,6 @@
           function() {
             d3.selectAll(".hidden").classed("hidden", false); // reveal nav
           });
-      }, 10));
+      });
   </script>
 </div>

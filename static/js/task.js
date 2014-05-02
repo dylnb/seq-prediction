@@ -290,10 +290,16 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
   var rbubble  = makeBubble(stage, "response");
   var drawer   = makeDrawer();
 
-  var syl_code    = ["wao", "yai", "piu", "shin", "bam", "fei", "ti", "ra", "ki"];
-  var syl_choices = syl_code;
-  var conceal     = pred_window;
-  var mytrials    = stimuli;
+  var syl_code;
+  if (condition === "0") {
+    syl_code = ["wao", "yai", "piu", "shin", "bam", "fei",
+                "ti", "ra", "ki"];
+  } else {
+    syl_code = ["wao", "yai", "piu", "shin", "bam", "bam",
+                "ti", "ti", "ki", "fei", "ra"];
+  }
+  var conceal  = pred_window;
+  var mytrials = stimuli;
 
   setTimeout(function() {
     console.log("conceal: " + conceal);
@@ -366,10 +372,10 @@ var Questionnaire = function() {
 
 // Task object to keep track of the current phase
 var currentview;
-// // Condition determines grammar type
-// var stimfile = condition === "0" ? "static/data/fsa_grammar.csv"
-//                                  : "static/data/cfg_grammar.csv";
-var stimfile = "static/data/fsa_grammar.csv";
+// Condition determines grammar type
+var stimfile = condition === "0" ? "static/data/fsa_grammar.csv"
+                                 : "static/data/cfg_grammar.csv";
+// var stimfile = "static/data/fsa_grammar.csv";
 
 /************
  * RUN TASK *
@@ -381,7 +387,8 @@ $(window).load(function(){
       var stims = [];
       var randstims = [];
       queue()
-        .defer(d3.csv, stimfile, function(d) {
+        .defer(d3.csv, stimfile, function(d) { // first load the data
+          console.log("starting deferral");
           // // first number identifies interruption point
           // var inter = _.head(d.Sequence.split(" "));
           // // next numbers code for a particular sequence of syllables
@@ -396,69 +403,69 @@ $(window).load(function(){
             function(code) { return (+code - 1); }
           );
           stims.push({inter: 200, sequence: codes});
-        }, function(error, rows) {
-          console.log("error");
-          console.log.apply(console, stims);
         })
-        .await(setTimeout(function() {
-          console.log("starting awaital");
-          var splitStims = _.values(_.groupBy(stims, function(trial) {
-            var l = trial.sequence.length;
-            if (l < 5) { return "L"; }
-            else if (l === 5) { return "E"; }
-            else { return "R"; }
-          }));
+        .await(function(error) { // then wait 3s, randomize data, run task
+          setTimeout(function() {
+            console.log("starting awaital");
+            var splitStims = _.values(_.groupBy(stims, function(trial) {
+              var l = trial.sequence.length;
+              if (l < 5) { return "L"; }
+              else if (l === 5) { return "E"; }
+              else { return "R"; }
+            }));
 
-          var warmups   = splitStims[0];
-          var fives     = splitStims[1];
+            var warmups = splitStims[0];
+            var fives   = splitStims[1];
 
-          var pretrials = _.shuffle(
-            warmups.slice(0, warmups.length / 2).concat(
-              fives.slice(0, fives.length / 2)
-            )
-          ).slice(0,2);
-
-          var midtrials = _.shuffle(
-            warmups.slice(warmups.length / 2).concat(
-              fives.slice(fives.length / 2, 3 * fives.length / 4),
-              _.map(
-                fives.slice(3 * fives.length / 4),
-                function(s) { s.inter = 202; return s; }
+            var pretrials = _.shuffle(
+              warmups.slice(0, warmups.length / 2).concat(
+                fives.slice(0, fives.length / 2)
               )
-            )
-          ).slice(0,5);
+            ).slice(0,2);
 
-          var toughgroups = _.groupBy(
-            splitStims[2],
-            function(trial) { return trial.sequence.length; }
-          );
-          var inter_columns = []
-          _.each(toughgroups, function(value, key) {
-            var n = key;
-            var n_yield = value.length;
-            var int_points = _.range(200 + Math.floor(n/2), 200 + (n-2));
-            var b = [];
-            for (i = 0; i < n_yield; i++) {
-              b.push(int_points[i % int_points.length]);
-            }
-            inter_columns.push(b);
-          });
-          var toughies = _.zip(
-            _.flatten(inter_columns),
-            _.sortBy(splitStims[2], function(trial) { return trial.sequence.length; })
-          ).map(function(ht) { return {inter: ht[0], sequence: ht[1].sequence}; });
+            var midtrials = _.shuffle(
+              warmups.slice(warmups.length / 2).concat(
+                fives.slice(fives.length / 2, 3 * fives.length / 4),
+                _.map(
+                  fives.slice(3 * fives.length / 4),
+                  function(s) { s.inter = 202; return s; }
+                )
+              )
+            ).slice(0,5);
 
-          var fintrials = _.shuffle(toughies).slice(0,5);
+            var toughgroups = _.groupBy(
+              splitStims[2],
+              function(trial) { return trial.sequence.length; }
+            );
+            var inter_columns = []
+            _.each(toughgroups, function(value, key) {
+              var n = key;
+              var n_yield = value.length;
+              var int_points = _.range(200 + Math.floor(n/2), 200 + (n-2));
+              var b = [];
+              for (i = 0; i < n_yield; i++) {
+                b.push(int_points[i % int_points.length]);
+              }
+              inter_columns.push(b);
+            });
+            var toughies = _.zip(
+              _.flatten(inter_columns),
+              _.sortBy(splitStims[2], function(trial) { return trial.sequence.length; })
+            ).map(function(ht) { return {inter: ht[0], sequence: ht[1].sequence}; });
 
-          randstims = pretrials.concat(midtrials, fintrials);
-          console.log("randstims");
-          console.log.apply(console, randstims);
-          currentview = new SeqPredict(
-            randstims, // trial data
-            counterbalance === "0" ? 1 : 3, // prediction window
-            false, // real experiment; not practice
-            function() { currentview = new Questionnaire(); } // post-exp
-          );
-        }, 1000));
-  });
+            var fintrials = _.shuffle(toughies).slice(0,5);
+
+            randstims = pretrials.concat(midtrials, fintrials);
+            console.log("randstims");
+            console.log.apply(console, randstims);
+            currentview = new SeqPredict(
+              randstims, // trial data
+              counterbalance === "0" ? 1 : 3, // prediction window
+              false, // real experiment; not practice
+              function() { currentview = new Questionnaire(); } // post-exp
+            );
+          }, 3000);
+        });
+    }
+  );
 });

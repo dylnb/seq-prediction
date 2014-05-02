@@ -265,7 +265,7 @@ div.elephant {
   padding: 0px;
   margin-right: 2em;
   margin-top: 12em;
-  background: #FFFFFF;
+  /* background: #fff; */
   -webkit-border-radius: 40px;
   -moz-border-radius: 40px;
   border-radius: 40px;
@@ -287,6 +287,7 @@ div.elephant {
   font-size:48px;
   color: #814700;
   padding-left: 12px;
+  font-weight: normal;
 }
 
 .response:after {
@@ -294,7 +295,7 @@ div.elephant {
   position: absolute;
   border-style: solid;
   border-width: 14px 0 14px 19px;
-  border-color: transparent #FFFFFF;
+  border-color: transparent #fff;
   display: block;
   width: 0;
   z-index: 1;
@@ -328,6 +329,7 @@ div.elephant {
 }
 .inst-response:after {
   top:43px;
+  border-color: transparent #f5f5f5;
 }
 .inst-resp div p {
   font-size:42px;
