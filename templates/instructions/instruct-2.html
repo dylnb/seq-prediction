@@ -5,7 +5,7 @@
       class="btn btn-primary btn-lg continue pull-right">
       Next <span class="glyphicon glyphicon-arrow-right"></span>
     </button>
-    <button type="button" id="next" value="next" disabled
+    <button type="button" id="next" value="next"
       class="btn btn-primary btn-lg previous pull-right">
       <span class="glyphicon glyphicon-arrow-left"></span> Previous 
     </button>
@@ -14,8 +14,15 @@
   <div class="well">
     <p>
     As the experiment proceeds, the elephant will tell you the story one sentence
-    at a time. Click the elephant below to see a few sentences in a row.
+    at a time. Click the button below to see a few sentences in a row.
     </p>
+    <div class="row">
+      <div class="col-xs-12 text-center">
+        <button type="button" id="startdemo" class="btn btn-default btn-lg">
+          See sentences
+        </button>
+      </div>
+    </div>
     <div style="overflow: hidden">
       <div class="elephant">
         <svg width=160 height=160>
@@ -34,27 +41,6 @@
       </div>
     </div>
   </div>
-	<!-- <hr> -->
-  <!-- <div class="instructionsnav"> -->
-    <!-- <div class="row"> -->
-      <!-- <div class="col-xs-2"> -->
-        <!-- <button type="button" id="next" value="next" -->
-          <!-- class="btn btn-primary btn-lg previous"> -->
-          <!-- <span class="glyphicon glyphicon-arrow-left"></span> Previous -->
-        <!-- </button> -->
-      <!-- </div> -->
-        <!-- <div class="col-xs-8"> -->
-        <!-- </div> -->
-      <!-- <div class="col-xs-2"> -->
-        <!-- <button type="button" -->
-          <!-- id="next" -->
-          <!-- value="next" -->
-          <!-- class="btn btn-primary btn-lg continue pull-right"> -->
-          <!-- Next <span class="glyphicon glyphicon-arrow-right"></span> -->
-        <!-- </button> -->
-      <!-- </div> -->
-    <!-- </div> -->
-  <!-- </div> -->
   <script type="text/javascript">
     var demo_syl_code = ["wao", "yai", "piu", "shin", "bam", "fei", "ti", "ra", "ki"];
     var demodrawsyl = function(bubble, syl) {
@@ -98,13 +84,15 @@
           demofreebie(sequence, stim_array);
         }, 500);
       } else {
-        d3.selectAll("#next").property("disabled", false);
+        d3.select(".continue").property("disabled", false);
       }
     };
     var el = d3.select(".elephant");
     var sbubble = d3.select(".stim");
-    el.on("click", function() {
-        dodemo([[0,1,2,3,4], [1,3,0], [2,4,3,1,0,4]]);
+    var start = d3.select("#startdemo");
+    start.on("click", function() {
+             dodemo([[0,1,2,3,4], [1,3,0], [2,4,3,1,0,4]]);
+             start.property("disabled", true);
     });
   </script>
 </div>

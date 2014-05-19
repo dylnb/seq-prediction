@@ -44,17 +44,16 @@ td = T ["9"]
 -- containing the yeilds from all the subtrees
 expand :: Cat -> [String]
 expand (T  labs ) = labs
-expand (NT catss) = catss >>= map concat . sequence . map expand
+expand (NT catss) = catss >>= map concat . mapM expand
 
 -- break sentences into lists of words, and sort the lists by length
 org :: [String] -> [[String]]
 --org ss = sortBy (compare `on` length) $ filter ((12 >) . length) splits
-org ss = sortBy (compare `on` length) $ splits
-  where splits = map words ss
+org = sortBy (compare `on` length) . map words
 
 -- group sentence-lists by length
 grp :: [[String]] -> [[[String]]]
-grp sss = groupBy ((==) `on` length) sss
+grp = groupBy ((==) `on` length)
 
 -- all the grammatical sentences of our FSA; broken into lists of words and
 -- sorted by length
@@ -88,9 +87,9 @@ replaceNs :: String -> String
 replaceNs ss = unwords newsplits
   where splits = words ss
         newsplits = tail $ foldl rep ["-1"] splits
-        rep a b = if b `elem` ["5","6","7","8"] && last a /= "9"
-                    then a ++ ["10",b]
-                    else a ++ [b]
+        rep a b = a ++ (if b `elem` ["5","6","7","8"] && last a /= "9"
+                          then ["10",b]
+                          else [b])
 
 replaceNNs :: String -> IO String
 replaceNNs ss = do
@@ -108,9 +107,7 @@ replaceDs ss = unwords newsplits
         newsplits = [splits!!0, splits!!1] ++ reps
         reps = do n <- [2..length splits - 1]
                   let [x,y,z] = [splits!!(n-2), splits!!(n-1), splits!!n]
-                  if (x == "9" && z == "10")
-                    then return "11"
-                    else return z
+                  return (if x == "9" && z == "10" then "11" else z)
 
 sampsizes = [4, 16, 12, 15, 23, 30, 34, 26, 17, 8, 5]
 
