@@ -9,11 +9,11 @@ var psiTurk = PsiTurk(uniqueId, adServerLoc);
 
 // All pages loaded in course of experiment
 var pages = [
-	"instructions/instruct-1.html",
-	"instructions/instruct-2.html",
-	"instructions/instruct-3.html",
-  "instructions/instruct-4.html",
-  "instructions/instruct-5.html",
+	// "instructions/instruct-1.html",
+	// "instructions/instruct-2.html",
+	// "instructions/instruct-3.html",
+  // "instructions/instruct-4.html",
+  // "instructions/instruct-5.html",
 	"instructions/instruct-ready.html",
   "teststage.html",
 	"postquestionnaire.html"
@@ -22,11 +22,11 @@ var pages = [
 psiTurk.preloadPages(pages);
 
 var instructionPages = [ // demo instructions
-	"instructions/instruct-1.html",
-	"instructions/instruct-2.html",
-	"instructions/instruct-3.html",
-  "instructions/instruct-4.html",
-  "instructions/instruct-5.html",
+	// "instructions/instruct-1.html",
+	// "instructions/instruct-2.html",
+	// "instructions/instruct-3.html",
+  // "instructions/instruct-4.html",
+  // "instructions/instruct-5.html",
 	"instructions/instruct-ready.html"
 ];
 
@@ -97,6 +97,7 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
   var hideBubble = function(bubble) {
     bubble.classed("hidden", true);
     bubble.selectAll("p").remove();
+    bubble.select("hr").remove();
   };
 
   var clearDrawer = function(drawer) {
@@ -262,13 +263,19 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
       var stim = stim_array.shift();
       var sequence = stim.sequence;
       _.each(sequence, _.partial(drawSyl, sbubble));
-      showBubble(sbubble);
       setTimeout(function() {
         if (stim.inter === 200) {
+          showBubble(sbubble);
           drawFreebie(sequence, stim, stim_array);
         } else {
           console.log("inter:");
           console.log(stim.inter);
+          var bar = stim.inter - 199;
+          sbubble.select("div")
+                 .insert("hr", "p:nth-of-type(" + bar + ")")
+                 .attr("class", "vline")
+                 .style("background-color", "black");
+          showBubble(sbubble);
           drawSequence(sequence, stim, stim_array);
         }
       }, 2000)
@@ -291,13 +298,14 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
   var drawer   = makeDrawer();
 
   var syl_code;
-  if (condition === "0") {
-    syl_code = ["wao", "yai", "piu", "shin", "bam", "fei",
-                "ti", "ra", "ki"];
-  } else {
-    syl_code = ["wao", "yai", "piu", "shin", "bam", "bam",
-                "ti", "ti", "ki", "fei", "ra"];
-  }
+  // if (condition === "0") {
+  //   syl_code = ["wao", "yai", "piu", "shin", "bam", "fei",
+  //               "ti", "ra", "ki"];
+  // } else {
+  //   syl_code = ["wao", "yai", "piu", "shin", "bam", "bam",
+  //               "ti", "ti", "ki", "fei", "ra"];
+  // }
+  syl_code = ["pa", "bo", "gu", "ta", "mo", "ni", "te", "ki", "le", "fu"];
   var conceal  = pred_window;
   var mytrials = stimuli;
 
@@ -455,7 +463,8 @@ $(window).load(function(){
 
             var fintrials = _.shuffle(toughies).slice(0,5);
 
-            randstims = pretrials.concat(midtrials, fintrials);
+            // randstims = pretrials.concat(midtrials, fintrials);
+            randstims = fintrials;
             console.log("randstims");
             console.log.apply(console, randstims);
             currentview = new SeqPredict(
