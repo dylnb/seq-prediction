@@ -9,25 +9,27 @@ var psiTurk = PsiTurk(uniqueId, adServerLoc);
 
 // All pages loaded in course of experiment
 var pages = [
-	// "instructions/instruct-1.html",
-	// "instructions/instruct-2.html",
-	// "instructions/instruct-3.html",
-  // "instructions/instruct-4.html",
-  // "instructions/instruct-5.html",
-	"instructions/instruct-ready.html",
+  "instructions/instruct-1.html",
+  "instructions/instruct-2.html",
+  "instructions/instruct-3.html",
+  "instructions/instruct-35.html",
+  "instructions/instruct-4.html",
+  "instructions/instruct-5.html",
+  "instructions/instruct-ready.html",
   "teststage.html",
-	"postquestionnaire.html"
+  "postquestionnaire.html"
 ];
 
 psiTurk.preloadPages(pages);
 
 var instructionPages = [ // demo instructions
-	// "instructions/instruct-1.html",
-	// "instructions/instruct-2.html",
-	// "instructions/instruct-3.html",
-  // "instructions/instruct-4.html",
-  // "instructions/instruct-5.html",
-	"instructions/instruct-ready.html"
+  "instructions/instruct-1.html",
+  "instructions/instruct-2.html",
+  "instructions/instruct-3.html",
+  "instructions/instruct-35.html",
+  "instructions/instruct-4.html",
+  "instructions/instruct-5.html",
+  "instructions/instruct-ready.html"
 ];
 
 
@@ -116,10 +118,10 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
   };
 
   // reveals the first still-hidden syllable of a bubble
-  var showOneSyl = function(bubble) {
+  var showOneSyl = function(bubble, color) {
     bubble.select(".white")
           .classed("white", false)
-          .style("color", "#606388");
+          .style("color", color || "#606388");
   };
 
   var interrupt = function(syls, callback) {
@@ -143,6 +145,8 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
                 } else {
                   console.log("guess: ");
                   console.log.apply(console, guess);
+                  drawer.selectAll("button")
+                        .property("disabled", true);
                   // check the guess, finish the sequence, launch next trial
                   callback(guess);
                 }
@@ -154,7 +158,8 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
     // "cb" below is the callback to checkGuess, which is itself passed in as
     // callback to interrupt; checkGuess does what it says, and then this
     // callback "cb" finishes the sequence and launches the next trial
-    var cb = function() {
+    var cb = function(correct) {
+      var wind = conceal;
       var suffix = setInterval(function() {
         if (_.isEmpty(sequence)) {
           clearInterval(suffix);
@@ -163,7 +168,12 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
           setTimeout(function() { doTrial(stim_array); }, 500);
         } else {
           var syl = sequence.shift();
-          showOneSyl(sbubble);
+          if (wind === 0) {
+            showOneSyl(sbubble)
+          } else {
+            showOneSyl(sbubble, correct ? "green" : "red");
+            wind = wind - 1;
+          }
         }
       }, 500);
       return suffix;
@@ -216,7 +226,7 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
               .transition().duration(300).attr("transform", "translate(0,0)")
               .transition().duration(300).attr("transform", "translate(0,-50)")
               .transition().duration(300).attr("transform", "translate(0,0)")
-              .each("end", callback);
+              .each("end", function() { callback(true); });
     } else {
       var lefteye = elephant.select("#path3163");
       var righteye = elephant.select("#path3161");
@@ -252,7 +262,7 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
          .transition()
          .duration(0)
          .attr("transform", "translate(0,0)")
-         .each("end", callback);
+         .each("end", function() { callback(false); });
     }
   };
 
@@ -299,13 +309,21 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
 
   var syl_code;
   // if (condition === "0") {
-  //   syl_code = ["wao", "yai", "piu", "shin", "bam", "fei",
-  //               "ti", "ra", "ki"];
+  //   // syl_code = ["wao", "yai", "piu", "shin", "bam", "fei",
+  //   //             "ti", "ra", "ki"];
+  //   syl_code = ["gum", "plox", "tok", "trul",
+  //               "glif",
+  //               "pel",
+  //               "prez", "rix", "aaf"];
   // } else {
-  //   syl_code = ["wao", "yai", "piu", "shin", "bam", "bam",
-  //               "ti", "ti", "ki", "fei", "ra"];
+  //   // syl_code = ["wao", "yai", "piu", "shin", "bam", "bam",
+  //   //             "ti", "ti", "ki", "fei", "ra"];
+  //   syl_code = ["gum", "plox", "tok", "trul",
+  //               "glif", "glif",
+  //               "pel", "pel",
+  //               "prez", "rix", "aaf"]
   // }
-  syl_code = ["pa", "bo", "gu", "ta", "mo", "ni", "te", "ki", "le", "fu"];
+  syl_code = ["gum", "plox", "tok", "trul", "glif", "pel", "prez", "rix", "aaf"];
   var conceal  = pred_window;
   var mytrials = stimuli;
 

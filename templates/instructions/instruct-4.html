@@ -5,7 +5,7 @@
       class="btn btn-primary btn-lg continue pull-right">
       Next <span class="glyphicon glyphicon-arrow-right"></span>
     </button>
-    <button type="button" id="next" value="next"
+    <button type="button" id="previous" value="previous"
       class="btn btn-primary btn-lg previous pull-right">
       <span class="glyphicon glyphicon-arrow-left"></span> Previous 
     </button>
@@ -14,9 +14,9 @@
   <div class="well">
     <p>
     After you select the <span id="wrd"></span> that you think will come next
-    in the sentence, the elephant will react. If you correctly identify the
-    remainder of the sentence, you'll see the elephant jump up and down;
-    otherwise, you'll see its eyes roll. Either way, the elephant will finish
+    in the sentence, the elephant will react. If you get
+    <span id="wrd"></span> right, you'll see the elephant jump up and down;
+    otherwise, you'll see it roll its eyes. Either way, the elephant will finish
     its own sentence the way it intended all along.
     </p>
     <p>
@@ -31,7 +31,7 @@
         <div class="row">
           <div class="col-xs-12 text-center">
             <button type="button" id="startdemo" class="btn btn-default btn-lg">
-              See sentences
+              See a sentence
             </button>
           </div>
         </div>
@@ -42,10 +42,10 @@
           </svg>
         </div>
         <div class="stim inst-stim hidden">
-          <div> </div>
+          <!-- <div> </div> -->
         </div>
         <div class="response inst-response hidden">
-          <div> </div>
+          <!-- <div> </div> -->
         </div>
       </div>
       <div id="syl-drawer" class="hidden" style="padding-bottom: 1em;">
@@ -54,8 +54,8 @@
   </div>
   <script type="text/javascript">
     var wrds = counterbalance === "0" ? 
-      ["word", "'1'", "'2'"] :
-      ["words", "'1', '2', '3'", "'2', '3', '4'"];
+      ["word" , "it"  , "'1'", "'2'"] :
+      ["words", "them", "'1', '2', '3'", "'2', '3', '4'"];
 
     d3.selectAll("#wrd")
       .data(wrds)
@@ -79,6 +79,7 @@
     var demohidebubble = function(bubble) {
       bubble.classed("hidden", true);
       bubble.selectAll("p").remove();
+      bubble.select("hr").remove();
     };
     var demoshowdrawer = function(drawer) {
       drawer.classed("hidden", false);
@@ -101,6 +102,7 @@
                 .attr("type", "button")
                 .attr("class", "btn btn-default btn-lg")
                 .text(function(d) { return demo_syl_code[d]; })
+                // .text(function(d) { return demo_syl_code[d]; })
                 .on("click",
                     function(d) {
                       guess.push(d);
@@ -215,9 +217,28 @@
     });
     var cow = d3.select(".cow");
     var sbubble = d3.select(".stim");
+        sbubble.insert("div");
     var rbubble = d3.select(".response");
+        rbubble.insert("div");
     var conceal = counterbalance === "0" ? 1 : 3;
-    var demo_syl_code = ["wao", "yai", "piu", "shin", "bam", "fei", "ti", "ra", "ki"];
+    var demo_syl_code = ['gum','plox','tok','trul','glif','pel','prez','rix','aaf'];
+    /*
+    if (condition === "0") {
+      // syl_code = ["wao", "yai", "piu", "shin", "bam", "fei",
+      //             "ti", "ra", "ki"];
+      demo_syl_code = ["gum", "plox", "tok", "trul",
+                       "glif",
+                       "pel",
+                       "prez", "rix", "aaf"];
+    } else {
+      // syl_code = ["wao", "yai", "piu", "shin", "bam", "bam",
+      //             "ti", "ti", "ki", "fei", "ra"];
+      demo_syl_code = ["gum", "plox", "tok", "trul",
+                       "glif", "glif",
+                       "pel", "pel",
+                       "prez", "rix", "aaf"]
+    }
+    */
     var demodrawer = d3.select("#syl-drawer");
     var done = false;
     var start = d3.select("#startdemo");
@@ -228,6 +249,10 @@
       setTimeout(function() {
         seq = [1,2,3,2,1,2,3];
         _.each(seq, _.partial(demodrawsyl, sbubble));
+        sbubble.select("div")
+               .insert("hr", "p:nth-of-type(4)")
+               .attr("class", "vline")
+               .style("background-color", "black");
         demoshowbubble(sbubble);
         dodemosequence(seq);
       }, 500)

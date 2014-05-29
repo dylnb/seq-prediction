@@ -12,9 +12,16 @@
   </h1>
   <hr>
   <div class="well">
-    <p>
+    <p style="position: absolute;">
+    Once you've interrupted the elephant, you will see nine buttons emerge
+    beneath the two animals, one for each of the nine words in the language.
+    <b>Your goal is to predict the next <span id="wrd"></span> of the
+    sentence.</b> Click whichever <span id="wrd"></span> you think <span
+    id="wrd"></span> to the <span id="wrd"></span> that the elphant will say next.
+    </p>
+    <p style="color: transparent;">
     Sometimes, you (the cow) get so excited by the story that <b>you find
-    yourself anticipating what the elephant is going to say</b>. When this
+      yourself anticipating what the elephant is going to say</b>. When this
     happens, you will see a speech bubble emerge from the cow's mouth,
     indicating that you have just interrupted the elephant mid-sentence.
     You'll know that an interruption point is coming by the presence of a
@@ -23,7 +30,10 @@
     </p>
     <div class="row">
       <div class="col-xs-12 text-center">
-        <button type="button" id="startdemo" class="btn btn-default btn-lg">
+        <button type="button"
+          id="startdemo"
+          class="btn btn-default btn-lg"
+          disabled>
           See a sentence
         </button>
       </div>
@@ -52,6 +62,14 @@
     </div>
   </div>
   <script type="text/javascript">
+    var wrds = counterbalance === "0" ?
+      ["word"       , "button" , "corresponds", "word" ] :
+      ["three words", "buttons", "correspond" , "words"];
+
+    d3.selectAll("#wrd")
+      .data(wrds)
+      .text(_.identity);
+
     var demodrawsyl = function(bubble, syl) {
       var s = demo_syl_code[syl] || " ";
       bubble.select("div")
@@ -74,7 +92,6 @@
     var demointerrupt = function(syls) {
       var clicks = 0;
       demoshowbubble(rbubble);
-      /*
       var demodrawer = d3.select("#democontainer")
                          .insert("div", "#followup")
                          .attr("id", "syl-drawer")
@@ -86,6 +103,7 @@
                 .attr("type", "button")
                 .attr("class", "btn btn-default btn-lg")
                 .text(function(d) { return demo_syl_code[d]; })
+                // .text(function(d) { return demo_syl_code[d]; })
                 .on("click",
                     function(d) {
                       demodrawsyl(rbubble, d);
@@ -98,10 +116,9 @@
                           .property("disabled", false);
                       }
                     });
-      d3.select("#followup").classed("hidden", false);
-      */
-      d3.select(".continue").property("disabled", false);
+      // d3.select("#followup").classed("hidden", false);
     };
+    /*
     var dodemosequence = function(sequence) {
       var inter = 200;
       var prefix = setInterval(function() {
@@ -118,6 +135,7 @@
       }, 500);
       return prefix;
     };
+    */
     var el = d3.select(".elephant");
     var cow = d3.select(".cow");
     var sbubble = d3.select(".stim");
@@ -143,6 +161,21 @@
                        "prez", "rix", "aaf"]
     }
     */
+    var sequence = [1,2,3,2,1,2,3];
+    _.each(sequence, _.partial(demodrawsyl, sbubble));
+    sbubble.select("div")
+           .insert("hr", "p:nth-of-type(4)")
+           .attr("class", "vline")
+           .style("background-color", "black");
+    var inter = 200;
+    while (inter < 203) {
+      var syl = sequence.shift();
+      inter = inter + 1;
+      demoshowsyl(sbubble);
+    }
+    demoshowbubble(sbubble);
+    demointerrupt(_.range(demo_syl_code.length));
+    /*
     var start = d3.select("#startdemo");
     start.on("click", function() {
       setTimeout(function() {
@@ -157,5 +190,6 @@
       }, 500);
       start.property("disabled", true);
     });
+    */
   </script>
 </div>

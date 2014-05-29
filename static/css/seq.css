@@ -107,9 +107,13 @@ h1 button {
   padding-top: 15px;
 }
 
+.well {
+  position: relative;
+}
+
 
 /*
- * styling for seq-prediction elements (mostly the speech bubbles)
+ * styling for seq-prediction elements
  */
 #stage {
   /* height: 200px; */
@@ -134,7 +138,7 @@ h1 button {
   float:left;
   border-width: 0px;
   /* background-color: "red" !important; */
-  margin: -20px 0 -20px 12px;
+  margin: -18px 0 -18px 12px;
 }
 
 div.cow {
@@ -146,6 +150,11 @@ div.elephant {
   float: left;
   padding-top: 8em;
 }
+
+
+/*
+ * speech bubble styling
+ */
 
 .stim {
   position: absolute;
@@ -258,12 +267,8 @@ div.elephant {
 .inst-stim div p {
   font-size:42px;
 }
-.inst-stim > :first-child:before {
-  bottom: -47px;
-}
 .inst-stim > :first-child:after {
   background:#f5f5f5;
-  bottom: -20px;
 }
 
 .response {

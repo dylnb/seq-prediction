@@ -1,6 +1,7 @@
-import Data.List (intersperse, groupBy, sortBy, maximumBy, (\\))
+import Data.List (intersperse, groupBy, sortBy, (\\))
+import Data.List.Utils (replace)
 import Data.Function (on)
-import System.IO
+import System.IO()
 import Text.Printf
 import System.Random (randomRIO)
 import Control.Monad
@@ -10,7 +11,8 @@ import Control.Monad
 -- or one of several Terminals
 data Cat = NT [[Cat]] | T [String]
 
--- a simple Finite State Grammar written like a CFG
+-- phrase structure rules for a simple finite state grammar
+-- (based on "BROCANTO" from Opitz and Friederici 2004)
 
 -- defines the nonterminals
 s, vp, vp', np, pp :: Cat
@@ -40,6 +42,23 @@ d  = T ["8"]
 -- D2 -> "9"
 td = T ["9"]
 
+-- practice grammar
+ps, pnp, pvp, pap :: Cat
+-- S -> NP VP
+ps  = NT [[pnp, pvp]]
+-- NP -> D N (A) | D A N
+pnp = NT [[pd, pn], [pd, pn, pa], [pd, pa, pn]]
+-- VP -> V NP | V AP
+pvp = NT [[pv, pnp], [pv, pap]]
+-- AP -> N A
+pap = NT [[pn, pa]]
+pd, pn, pa, pv :: Cat
+pd = T ["1"]
+pn = T ["2"]
+pa = T ["3"]
+pv = T ["4"]
+
+
 -- generates all possible subtrees of a category, and returns a list
 -- containing the yeilds from all the subtrees
 expand :: Cat -> [String]
@@ -60,67 +79,91 @@ grp = groupBy ((==) `on` length)
 fsastims :: [[String]]
 fsastims = org $ map (intersperse ' ') $ expand s
 
+practicestims :: [[String]]
+practicestims = org $ map (intersperse ' ') $ expand ps
+
 roundToStr :: Int -> Float -> String
 roundToStr = printf "%0.*f"
 
 -- choice function
 pick :: [a] -> IO a
-pick xs = randomRIO (0, length xs - 1) >>= return . (xs !!)
+pick xs = liftM (xs !!) $ randomRIO (0, length xs - 1)
 
 -- chooses an n-size subset of xs
 pickN :: Eq a => Int -> [a] -> IO [a]
 pickN 1 xs = liftM return $ pick xs
-pickN n xs = do
+pickN n' xs = do
   x <- pickN 1 xs
-  ys <- pickN (n - 1) (xs \\ x)
+  ys <- pickN (n' - 1) (xs \\ x)
   return (x ++ ys)
 
 replaceVs :: String -> IO String
 replaceVs ss = do
   let splits = words ss
-  let xs = forM splits $ \s -> if s `elem` ["1","2"]
-                                 then pick [[s,"10"],["10",s]]
-                                 else return [s]
+  let xs = forM splits $ \s' -> if s' `elem` ["1","2"]
+                                  then pick [[s',"10"],["10",s']]
+                                  else return [s']
   liftM (unwords . concat) xs
 
 replaceNs :: String -> String
 replaceNs ss = unwords newsplits
   where splits = words ss
         newsplits = tail $ foldl rep ["-1"] splits
-        rep a b = a ++ (if b `elem` ["5","6","7","8"] && last a /= "9"
-                          then ["10",b]
-                          else [b])
+        rep a' b = a' ++ (if b `elem` ["5","6","7","8"] && last a' /= "9"
+                            then ["10",b]
+                            else [b])
 
 replaceNNs :: String -> IO String
 replaceNNs ss = do
   let splits = words ss
-  let xs = forM splits $ \s -> if s `notElem` ["5","6","7","8"]
-                                 then return [s]
-                                 else if (length splits == 2)
-                                        then return [s,"10"]
-                                        else pick [[s,"10"], [s]]
+  let xs = forM splits $ \s' -> if s' `notElem` ["5","6","7","8"]
+                                  then return [s']
+                                  else if length splits == 2
+                                         then return [s',"10"]
+                                         else pick [[s',"10"], [s']]
   liftM (unwords . concat) xs
 
 replaceDs :: String -> String
 replaceDs ss = unwords newsplits
   where splits = words ss
-        newsplits = [splits!!0, splits!!1] ++ reps
-        reps = do n <- [2..length splits - 1]
-                  let [x,y,z] = [splits!!(n-2), splits!!(n-1), splits!!n]
+        newsplits = [head splits, splits!!1] ++ reps
+        reps = do n' <- [2..length splits - 1]
+                  let [x,_,z] = [splits!!(n'-2), splits!!(n'-1), splits!!n']
                   return (if x == "9" && z == "10" then "11" else z)
 
-sampsizes = [4, 16, 12, 15, 23, 30, 34, 26, 17, 8, 5]
+-- collapseNs :: String -> String
+-- collapseNs = replace "8" "7" . replace "6" "5"
+
+downshift :: [String] -> [String]
+downshift = map (\s' -> if read s' > (6 :: Int) then show (read s' - (1 :: Int)) else s')
 
 -- main = do
---   xss <- sequence $ zipWith pickN sampsizes (grp fsastims)
---   let stims = concat (map (map unwords) xss)
+--   let sampsizes = [4, 16, 12, 15, 23, 30, 34, 26, 17, 8, 5]
+--   xss <- zipWithM pickN sampsizes (grp fsastims)
+--   let stims = concatMap (map unwords) xss
 --   writeFile "fsa_grammar.csv" $ unlines ("Sequence":stims)
 
 main = do
-  cfg <- readFile "cfg_grammar.csv"
-  let stims = tail . lines $ cfg
-  let cfgstims = map replaceDs stims
-  writeFile "cfg_ds.csv" $ unlines ("Sequence":cfgstims)
+  let stims = map unwords practicestims
+  writeFile "practice_grammar.csv" $ unlines ("Sequence":stims)
+
+-- main = do
+--   cfg <- readFile "cfg_sixeight-less.csv"
+--   let stims = tail . lines $ cfg
+--   let cfgstims = map (unwords  . downshift . words) stims
+--   writeFile "cfg_grammar.csv" $ unlines ("Sequence":cfgstims)
+
+-- main = do
+--   cfg <- readFile "cfg_ds.csv"
+--   let stims = tail . lines $ cfg
+--   let cfgstims = map collapseNs stims
+--   writeFile "cfg_sixeight-less.csv" $ unlines ("Sequence":cfgstims)
+
+-- main = do
+--   cfg <- readFile "cfg_nns.csv"
+--   let stims = tail . lines $ cfg
+--   let cfgstims = map replaceDs stims
+--   writeFile "cfg_ds.csv" $ unlines ("Sequence":cfgstims)
 
 -- main = do
 --   cfg <- readFile "cfg_rohr_LC.csv"
