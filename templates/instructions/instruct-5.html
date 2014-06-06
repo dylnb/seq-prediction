@@ -1,63 +1,256 @@
-<div id="container-exp">
-  <div style="padding: 0 50px">
-    <h1>
-      Practice
-      <button type="button" id="next" value="next" disabled
-        class="btn btn-primary btn-lg continue pull-right">
-        Next <span class="glyphicon glyphicon-arrow-right"></span>
-      </button>
-      <button type="button" id="previous" value="previous"
-        class="btn btn-primary btn-lg previous pull-right">
-        <span class="glyphicon glyphicon-arrow-left"></span> Previous 
-      </button>
-    </h1>
-    <hr>
+<div id="container-instructions">
+  <h1>
+    Instructions
+    <button type="button" id="next" value="next" disabled
+      class="btn btn-primary btn-lg continue pull-right">
+      Next <span class="glyphicon glyphicon-arrow-right"></span>
+    </button>
+    <button type="button" id="previous" value="previous"
+      class="btn btn-primary btn-lg previous pull-right">
+      <span class="glyphicon glyphicon-arrow-left"></span> Previous 
+    </button>
+  </h1>
+  <hr>
+  <div class="well">
+    <p>
+    After you select the <span id="wrd"></span> that you think will come next
+    in the sentence, the elephant will react. If you get
+    <span id="wrd"></span> right, you'll see the elephant jump up and down;
+    otherwise, you'll see it roll its eyes. Either way, the elephant will finish
+    its own sentence the way it intended all along.
+    </p>
+    <p>
+    Click the button below to start a sentence. <b>When you interrupt, select
+    <span id="wrd"></span> to see the elephant react positively.</b> Then
+    click the button again to start the trial over, but this time <b>when you
+    interrupt, select <span id="wrd"></span> to see the elephant react
+    negatively.</b>
+    </p>
+    <div id="democontainer" style="overflow: hidden;">
+      <div id="demostage" style="overflow: auto; padding-bottom: 4.6em;">
+        <div class="row">
+          <div class="col-xs-12 text-center">
+            <button type="button" id="startdemo" class="btn btn-default btn-lg">
+              See a sentence
+            </button>
+          </div>
+        </div>
+        <div class="cow" style="padding-top: 7em;">
+          <svg width="160" height="160">
+            <image xlink:href="static/images/cow.svg"
+              width="160" height="120" y=40 />
+          </svg>
+        </div>
+        <div class="stim inst-stim hidden">
+          <!-- <div> </div> -->
+        </div>
+        <div class="response inst-response hidden">
+          <!-- <div> </div> -->
+        </div>
+      </div>
+      <div id="syl-drawer" class="hidden" style="padding-bottom: 1em;">
+      </div>
+    </div>
   </div>
   <script type="text/javascript">
-    // var practicestimfile = condition === "0" ? "static/data/practicefsa.csv"
-    //                                          : "static/data/practicecfg.csv";
-    var practicestimfile = "static/data/practice_grammar.csv"
-    var stims = [];
-    queue()
-      .defer(d3.csv, practicestimfile, function(d) { // first load data
-        console.log("starting deferral");
-        var codes = _.map(d.Sequence.split(" "),
-                          function(code) { return (+code - 1); });
-        stims.push({inter: 200, sequence: codes});
-      })
-      .await(function(error) { // then begin practice task
-        console.log("starting awaital");
+    var wrds = counterbalance === "0" ? 
+      condition === "0" ? ["word" , "it"  , "'tid'", "'daz'"]
+                        : ["word" , "it"  , "'mer'", "'daz'"]
+                                      :
+      condition === "0" ? 
+        ["words", "them", "'tid', 'nav', 'sib'", "'daz', 'nav', 'sib'"]
+                        :
+        ["words", "them", "'mer', 'sib', 'rud'", "'daz', 'sib', 'rud'"];
 
-        var practicegroups = _.groupBy(
-          stims,
-          function(trial) { return trial.sequence.length; }
-        );
-        var inter_columns = []
-        _.each(practicegroups, function(value, key) {
-          var n = key;
-          var n_yield = value.length;
-          var int_points = _.range(200 + Math.floor(n/2), 200 + (n-2));
-          var b = [];
-          for (i = 0; i < n_yield; i++) {
-            b.push(int_points[i % int_points.length]);
+    d3.selectAll("#wrd")
+      .data(wrds)
+      .text(_.identity);
+
+    var demodrawsyl = function(bubble, syl) {
+      var s = demo_syl_code[syl] || " ";
+      bubble.select("div")
+            .append("p")
+            .attr("class", "white")
+            .text(s);
+    };
+    var demoshowsyl = function(bubble, color) {
+      bubble.select(".white")
+            .classed("white", false)
+            .style("color", color || "#606388");
+    };
+    var demoshowbubble = function(bubble) {
+      bubble.classed("hidden", false);
+    };
+    var demohidebubble = function(bubble) {
+      bubble.classed("hidden", true);
+      bubble.selectAll("p").remove();
+      bubble.select("hr").remove();
+    };
+    var demoshowdrawer = function(drawer) {
+      drawer.classed("hidden", false);
+    }
+    var demohidedrawer = function(drawer) {
+      drawer.classed("hidden", true);
+      drawer.selectAll("button").remove();
+    }
+    var demointerrupt = function(syls, callback) {
+      var clicks = 0;
+      var guess = [];
+      demoshowbubble(rbubble);
+      d3.select("#demostage")
+        .style("padding-bottom", "1em");
+      demoshowdrawer(demodrawer);
+      demodrawer.selectAll("button")
+                .data(syls)
+                .enter()
+                .insert("button")
+                .attr("type", "button")
+                .attr("class", "btn btn-default btn-lg")
+                .text(function(d) { return demo_syl_code[d]; })
+                // .text(function(d) { return demo_syl_code[d]; })
+                .on("click",
+                    function(d) {
+                      guess.push(d);
+                      demodrawsyl(rbubble, d);
+                      if (clicks < conceal - 1) { clicks++; }
+                      else {
+                        demodrawer.selectAll("button")
+                                  .property("disabled", true);
+                        callback(guess);
+                      }
+                    });
+    };
+    var democheck = function(sequence, guess, callback) {
+      // callback here finishes the sequence, then starts next trial
+      var target = sequence.slice(0, conceal);
+      var scored = _.zip(target, guess)
+                    .map(function(p) { return _.isEqual.apply(_, p); });
+      console.log("target: ");
+      console.log.apply(console, target);
+      console.log("guess: ");
+      console.log.apply(console, guess);
+      console.log("scored: ");
+      console.log.apply(console, scored);
+      if (_.isEqual(target, guess)) {
+        el.transition().duration(300).attr("transform", "translate(0,-50)")
+          .transition().duration(300).attr("transform", "translate(0,0)")
+          .transition().duration(300).attr("transform", "translate(0,-50)")
+          .transition().duration(300).attr("transform", "translate(0,0)")
+          .each("end", function() { done *= 5; callback(scored); });
+      } else {
+        var lefteye = el.select("#path3163");
+        var righteye = el.select("#path3161");
+        lefteye
+          .transition()
+          .duration(2000)
+          .ease("linear")
+          .attrTween("transform", function () {
+            return function (t) {
+              var radius = 6;
+              var t_angle = (4 * Math.PI) * t;
+              var t_x = radius * Math.cos(t_angle);
+              var t_y = radius * Math.sin(t_angle);
+              return "translate(" + (t_x - 6) + "," + (t_y - 2) + ")";
+            };
+          })
+          .transition()
+          .duration(0)
+          .attr("transform", "translate(0,0)");
+         righteye
+           .transition()
+           .duration(2000)
+           .ease("linear")
+           .attrTween("transform", function () {
+             return function (t) {
+               var radius = 6;
+               var t_angle = (4 * Math.PI) * t;
+               var t_x = radius * Math.cos(t_angle + Math.PI);
+               var t_y = radius * Math.sin(t_angle + Math.PI);
+               return "translate(" + (t_x + 6) + "," + (t_y - 2) + ")";
+             };
+           })
+           .transition()
+           .duration(0)
+           .attr("transform", "translate(0,0)")
+           .each("end", function() { done *= 3; callback(scored); });
+      }
+    };
+    var dodemosequence = function(sequence) {
+      var cb = function(scored) {
+        var wind = conceal;
+        var suffix = setInterval(function() {
+          if (_.isEmpty(sequence)) {
+            clearInterval(suffix);
+            _.each([rbubble, sbubble], demohidebubble);
+            demohidedrawer(demodrawer);
+            d3.select("#demostage")
+              .style("padding-bottom", "4.6em");
+            if (done % 15 === 0) { // seen both positive and negative responses
+              d3.select(".continue").property("disabled", false);
+            } else { start.property("disabled", false); }
+          } else {
+            sequence.shift();
+            if (wind === 0) { demoshowsyl(sbubble); }
+            else {
+              demoshowsyl(sbubble, _.head(scored) ? "green" : "red");
+              wind--;
+              scored.shift();
+            }
           }
-          inter_columns.push(b);
-        });
-        var practicestims = _.zip(
-          _.flatten(inter_columns),
-          _.sortBy(stims, function(trial) { return trial.sequence.length; })
-        ).map(function(ht) { return {inter: ht[0], sequence: ht[1].sequence}; });
-        
-        console.log("practicestims");
-        console.log.apply(console, practicestims);
-        currentview = new SeqPredict(
-          _.shuffle(practicestims).slice(0,8), // practice data
-          counterbalance === "0" ? 1 : 3, // prediction window
-          true, // just practice
-          function() {
-            // d3.selectAll(".hidden").classed("hidden", false); // reveal nav
-            d3.select(".continue").property("disabled", false);
-          });
-      });
+        }, 250);
+        return suffix;
+      };
+      var inter = 200;
+      var prefix = setInterval(function() {
+        if (203 - inter === 0) {
+          clearInterval(prefix);
+          demointerrupt(_.range(demo_syl_code.length),
+                        function(guess) { democheck(sequence, guess, cb) });
+        } else { sequence.shift(); inter++; demoshowsyl(sbubble); }
+      }, 250);
+      return prefix;
+    };
+    var el = d3.select("#demostage")
+               .insert("div", ".cow")
+               .attr("class", "elephant")
+               .append("svg")
+               .attr("width", 160)
+               .attr("height", 160)
+               .attr("viewBox", "0 0 360 344")
+               .attr("preserveAspectRatio", "xMinYMin meet")
+               .append("g")
+               .attr("id", "elephant");
+    d3.xml("static/images/elephant.svg", "image/svg+xml", function(xml) {
+      var importedNode = document.importNode(xml.documentElement, true);
+      importedNode.y.baseVal.value = 95;
+      el.node().appendChild(importedNode);
+    });
+    var cow = d3.select(".cow");
+    var sbubble = d3.select(".stim");
+        sbubble.insert("div");
+    var rbubble = d3.select(".response");
+        rbubble.insert("div");
+    var conceal = counterbalance === "0" ? 1 : 3;
+    var demodrawer = d3.select("#syl-drawer");
+    var done = 1;
+    var start = d3.select("#startdemo");
+    start.on("click", function() {
+      demohidebubble(sbubble);
+      demohidebubble(rbubble);
+      demohidedrawer(demodrawer);
+      setTimeout(function() {
+        var example = condition === "0" ? [8,2,3,5,7,8,2]
+                                        : [5,9,4,2,8,6,10];
+        var seq = _.map(example, function(n) { return n - 1; });
+        _.each(seq, _.partial(demodrawsyl, sbubble));
+        sbubble.select("div")
+               .insert("hr", "p:nth-of-type(4)")
+               .attr("class", "vline")
+               .style("background-color", "black");
+        demoshowbubble(sbubble);
+        setTimeout(function() { dodemosequence(seq); }, 500);
+      }, 500)
+      start.property("disabled", true);
+    });
   </script>
 </div>

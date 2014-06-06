@@ -68,11 +68,8 @@
             demohidebubble(sbubble);
             setTimeout(function() { dodemo(stim_array); }, 500);
           }, 1000);
-        } else {
-          var syl = sequence.shift();
-          demoshowsyl(sbubble);
-        }
-      }, 500);
+        } else { sequence.shift(); demoshowsyl(sbubble); }
+      }, 250);
       return fix;
     };
     var dodemo = function(stim_array) {
@@ -80,38 +77,20 @@
         var sequence = stim_array.shift();
         _.each(sequence, _.partial(demodrawsyl, sbubble));
         demoshowbubble(sbubble);
-        setTimeout(function() {
-          demofreebie(sequence, stim_array);
-        }, 500);
-      } else {
-        d3.select(".continue").property("disabled", false);
-      }
+        setTimeout(function() { demofreebie(sequence, stim_array); }, 500);
+      } else { d3.select(".continue").property("disabled", false); }
     };
-    var demo_syl_code = ["gum","plox","tok","trul","glif","pel","prez","rix","aaf"];
-    /*
-    if (condition === "0") {
-      // syl_code = ["wao", "yai", "piu", "shin", "bam", "fei",
-      //             "ti", "ra", "ki"];
-      demo_syl_code = ["gum", "plox", "tok", "trul",
-                       "glif",
-                       "pel",
-                       "prez", "rix", "aaf"];
-    } else {
-      // syl_code = ["wao", "yai", "piu", "shin", "bam", "bam",
-      //             "ti", "ti", "ki", "fei", "ra"];
-      demo_syl_code = ["gum", "plox", "tok", "trul",
-                       "glif", "glif",
-                       "pel", "pel",
-                       "prez", "rix", "aaf"]
-    }
-    */
     var el = d3.select(".elephant");
     var sbubble = d3.select(".stim");
         sbubble.insert("div");
     var start = d3.select("#startdemo");
+    var examples = condition === "0" ? [[9,5,1,3,6], [8,1,3], [8,1,3,9,5,2]]
+                                     : [[6,9,3,5,9], [6,9,2], [6,9,3,1,8,6]]
     start.on("click", function() {
-             dodemo([[0,1,2,3,4], [1,3,0], [2,4,3,1,0,4]]);
-             start.property("disabled", true);
+      dodemo(_.map(examples, function(l) {
+        return _.map(l, function(n) { return n - 1; });
+      }));
+      start.property("disabled", true);
     });
   </script>
 </div>

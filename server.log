@@ -1,0 +1,152 @@
+2014-04-04 01:29:40,592 /usr/local/lib/python2.7/dist-packages/PsiTurk-1.0.10dev-py2.7.egg/psiturk/psiturk_js/psiturk.js
+2014-04-04 01:29:40,756 /usr/local/lib/python2.7/dist-packages/PsiTurk-1.0.10dev-py2.7.egg/psiturk/psiturk_js/psiturk.js
+2014-04-04 01:29:40,766 /usr/local/lib/python2.7/dist-packages/PsiTurk-1.0.10dev-py2.7.egg/psiturk/psiturk_js/psiturk.js
+2014-04-04 01:33:29,581 Exception on /compute_bonus [GET]
+Traceback (most recent call last):
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/usr/local/lib/python2.7/dist-packages/PsiTurk-1.0.10dev-py2.7.egg/psiturk/experiment.py", line 523, in regularpage
+    return render_template(pagename)
+  File "/usr/local/lib/python2.7/dist-packages/flask/templating.py", line 127, in render_template
+    return _render(ctx.app.jinja_env.get_or_select_template(template_name_or_list),
+  File "/usr/local/lib/python2.7/dist-packages/jinja2/environment.py", line 830, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+  File "/usr/local/lib/python2.7/dist-packages/jinja2/environment.py", line 791, in get_template
+    return self._load_template(name, self.make_globals(globals))
+  File "/usr/local/lib/python2.7/dist-packages/jinja2/environment.py", line 765, in _load_template
+    template = self.loader.load(self, name, globals)
+  File "/usr/local/lib/python2.7/dist-packages/jinja2/loaders.py", line 113, in load
+    source, filename, uptodate = self.get_source(environment, name)
+  File "/usr/local/lib/python2.7/dist-packages/flask/templating.py", line 64, in get_source
+    raise TemplateNotFound(template)
+TemplateNotFound: compute_bonus
+2014-04-04 01:37:43,146 /usr/local/lib/python2.7/dist-packages/PsiTurk-1.0.10dev-py2.7.egg/psiturk/psiturk_js/psiturk.js
+2014-04-04 01:37:43,228 /usr/local/lib/python2.7/dist-packages/PsiTurk-1.0.10dev-py2.7.egg/psiturk/psiturk_js/psiturk.js
+2014-04-04 01:37:43,238 /usr/local/lib/python2.7/dist-packages/PsiTurk-1.0.10dev-py2.7.egg/psiturk/psiturk_js/psiturk.js
+2014-04-04 01:48:29,604 Exception on /compute_bonus [GET]
+Traceback (most recent call last):
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/usr/local/lib/python2.7/dist-packages/PsiTurk-1.0.10dev-py2.7.egg/psiturk/experiment.py", line 523, in regularpage
+    return render_template(pagename)
+  File "/usr/local/lib/python2.7/dist-packages/flask/templating.py", line 127, in render_template
+    return _render(ctx.app.jinja_env.get_or_select_template(template_name_or_list),
+  File "/usr/local/lib/python2.7/dist-packages/jinja2/environment.py", line 830, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+  File "/usr/local/lib/python2.7/dist-packages/jinja2/environment.py", line 791, in get_template
+    return self._load_template(name, self.make_globals(globals))
+  File "/usr/local/lib/python2.7/dist-packages/jinja2/environment.py", line 765, in _load_template
+    template = self.loader.load(self, name, globals)
+  File "/usr/local/lib/python2.7/dist-packages/jinja2/loaders.py", line 113, in load
+    source, filename, uptodate = self.get_source(environment, name)
+  File "/usr/local/lib/python2.7/dist-packages/flask/templating.py", line 64, in get_source
+    raise TemplateNotFound(template)
+TemplateNotFound: compute_bonus
+2014-04-04 01:48:47,858 Exception on /compute_bonus [GET]
+Traceback (most recent call last):
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/usr/local/lib/python2.7/dist-packages/PsiTurk-1.0.10dev-py2.7.egg/psiturk/experiment.py", line 523, in regularpage
+    return render_template(pagename)
+  File "/usr/local/lib/python2.7/dist-packages/flask/templating.py", line 127, in render_template
+    return _render(ctx.app.jinja_env.get_or_select_template(template_name_or_list),
+  File "/usr/local/lib/python2.7/dist-packages/jinja2/environment.py", line 830, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+  File "/usr/local/lib/python2.7/dist-packages/jinja2/environment.py", line 791, in get_template
+    return self._load_template(name, self.make_globals(globals))
+  File "/usr/local/lib/python2.7/dist-packages/jinja2/environment.py", line 765, in _load_template
+    template = self.loader.load(self, name, globals)
+  File "/usr/local/lib/python2.7/dist-packages/jinja2/loaders.py", line 113, in load
+    source, filename, uptodate = self.get_source(environment, name)
+  File "/usr/local/lib/python2.7/dist-packages/flask/templating.py", line 64, in get_source
+    raise TemplateNotFound(template)
+TemplateNotFound: compute_bonus
+2014-05-03 15:43:05,649 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-05-03 15:43:05,784 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-05-03 15:43:05,833 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-02 14:21:50,181 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-02 14:21:50,246 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-02 14:21:50,269 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-02 19:24:17 [3129] [ERROR] Invalid address: ('54.83.192.21', 22362)
+2014-06-02 19:25:45 [3145] [ERROR] Invalid address: ('54.83.192.21', 22362)
+2014-06-02 19:26:23,881 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-02 19:26:23,880 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-02 19:26:23,905 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-02 19:28:54,397 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-02 19:28:54,574 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-02 19:28:54,578 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-02 19:31:50,630 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-02 19:31:50,639 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-02 19:31:50,702 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-02 19:32:03,596 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-02 19:32:03,781 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-02 19:32:03,821 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-02 19:38:08,267 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-02 19:38:08,456 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-02 19:38:08,510 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-03 00:33:11,468 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-03 00:33:11,476 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-03 00:33:11,485 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-03 14:42:52,711 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-03 14:42:52,740 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-03 14:42:52,779 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-03 18:53:05,929 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-03 18:53:06,117 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-03 18:53:06,134 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-03 19:01:41,266 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-03 19:01:41,422 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-03 19:01:41,471 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-04 01:42:17,875 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-04 01:42:18,042 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-04 01:42:18,080 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-04 01:49:57,495 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-04 01:49:57,574 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-04 01:49:57,613 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-04 04:51:39,989 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-04 04:51:39,988 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-04 04:51:40,011 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-04 14:42:20,058 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-04 14:42:20,243 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-04 14:42:20,277 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-05 12:05:54,119 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-05 12:05:54,210 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-05 12:05:54,255 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-05 21:28:07,754 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-05 21:28:07,856 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-05 21:28:07,890 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-05 21:39:56,022 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-05 21:39:56,231 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-05 21:39:56,264 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-05 23:15:16,241 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-05 23:15:16,442 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-05 23:15:16,445 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-06 04:00:29,232 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-06 04:00:29,326 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-06 04:00:29,339 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-06 16:31:59,330 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-06 16:31:59,348 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js
+2014-06-06 16:31:59,392 /usr/local/lib/python2.7/dist-packages/psiturk/psiturk_js/psiturk.js

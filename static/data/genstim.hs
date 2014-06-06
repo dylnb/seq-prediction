@@ -135,7 +135,11 @@ replaceDs ss = unwords newsplits
 -- collapseNs = replace "8" "7" . replace "6" "5"
 
 downshift :: [String] -> [String]
-downshift = map (\s' -> if read s' > (6 :: Int) then show (read s' - (1 :: Int)) else s')
+downshift = map (\s' -> if read s' == (6 :: Int) || read s' == (7 :: Int)
+                          then show (read s' - (1 :: Int))
+                          else if read s' > (8 :: Int)
+                                 then show (read s' - (2 :: Int))
+                                 else s')
 
 -- main = do
 --   let sampsizes = [4, 16, 12, 15, 23, 30, 34, 26, 17, 8, 5]
@@ -143,15 +147,15 @@ downshift = map (\s' -> if read s' > (6 :: Int) then show (read s' - (1 :: Int))
 --   let stims = concatMap (map unwords) xss
 --   writeFile "fsa_grammar.csv" $ unlines ("Sequence":stims)
 
-main = do
-  let stims = map unwords practicestims
-  writeFile "practice_grammar.csv" $ unlines ("Sequence":stims)
-
 -- main = do
---   cfg <- readFile "cfg_sixeight-less.csv"
---   let stims = tail . lines $ cfg
---   let cfgstims = map (unwords  . downshift . words) stims
---   writeFile "cfg_grammar.csv" $ unlines ("Sequence":cfgstims)
+--   let stims = map unwords practicestims
+--   writeFile "practice_grammar.csv" $ unlines ("Sequence":stims)
+
+main = do
+  cfg <- readFile "cfg_sixeight-less.csv"
+  let stims = tail . lines $ cfg
+  let cfgstims = map (unwords  . downshift . words) stims
+  writeFile "cfg_grammar.csv" $ unlines ("Sequence":cfgstims)
 
 -- main = do
 --   cfg <- readFile "cfg_ds.csv"

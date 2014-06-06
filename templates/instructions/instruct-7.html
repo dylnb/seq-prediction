@@ -1,0 +1,69 @@
+<div id="container-exp">
+  <div style="padding: 0 50px">
+    <h1>
+      Practice
+      <button type="button" id="next" value="next" disabled
+        class="btn btn-primary btn-lg continue pull-right">
+        Next <span class="glyphicon glyphicon-arrow-right"></span>
+      </button>
+      <button type="button" id="previous" value="previous"
+        class="btn btn-primary btn-lg previous pull-right">
+        <span class="glyphicon glyphicon-arrow-left"></span> Previous 
+      </button>
+    </h1>
+    <hr>
+  </div>
+  <script type="text/javascript">
+    var practicestimfile = condition === "0" ? "static/data/practice_fsa.csv"
+                                             : "static/data/practice_cfg.csv";
+    // var practicestimfile = "static/data/practice_grammar.csv"
+    var stims = [];
+    queue()
+      .defer(d3.csv, practicestimfile, function(d) { // first load data
+        console.log("starting deferral");
+        var codes = _.map(d.Sequence.split(" "),
+                          function(code) { return (+code - 1); });
+        stims.push({inter: 200, sequence: codes});
+      })
+      .await(function(error) { // then begin practice task
+        console.log("starting awaital");
+
+        var pgroups = _.groupBy(
+          stims,
+          function(trial) { return trial.sequence.length; }
+        );
+        var inter_columns = []
+        _.each(pgroups, function(value, key) { // iterate over stim groups
+          var n = key; // length of strings in a particular group
+          var n_yield = value.length; // number of strings of length n
+          // acceptable interruption points: floor(n/2) through n-2
+          var int_points = _.range(200 + Math.floor(n/2), 200 + (n-2));
+          // take n_yield many elements from a cycle of
+          // the acceptable interruption points
+          var b = [];
+          for (i = 0; i < n_yield; i++) {
+            if (! _.isEmpty(int_points)) {
+              b.push(int_points[i % int_points.length]);
+            } else { b.push(200); }
+          }
+          // gather up the relevant cycle
+          inter_columns.push(b);
+        });
+        var practicestims = _.zip(
+          _.flatten(inter_columns),
+          _.sortBy(stims, function(trial) { return trial.sequence.length; })
+        ).map(function(ht) { return {inter: ht[0], sequence: ht[1].sequence}; });
+        
+        console.log("practicestims");
+        console.log.apply(console, practicestims);
+        currentview = new SeqPredict(
+          _.shuffle(practicestims).slice(0,8), // practice data
+          counterbalance === "0" ? 1 : 3, // prediction window
+          true, // just practice
+          function() {
+            // d3.selectAll(".hidden").classed("hidden", false); // reveal nav
+            d3.select(".continue").property("disabled", false);
+          });
+      });
+  </script>
+</div>

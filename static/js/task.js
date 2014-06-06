@@ -12,9 +12,10 @@ var pages = [
   "instructions/instruct-1.html",
   "instructions/instruct-2.html",
   "instructions/instruct-3.html",
-  "instructions/instruct-35.html",
   "instructions/instruct-4.html",
   "instructions/instruct-5.html",
+  "instructions/instruct-6.html",
+  "instructions/instruct-7.html",
   "instructions/instruct-ready.html",
   "teststage.html",
   "postquestionnaire.html"
@@ -26,9 +27,10 @@ var instructionPages = [ // demo instructions
   "instructions/instruct-1.html",
   "instructions/instruct-2.html",
   "instructions/instruct-3.html",
-  "instructions/instruct-35.html",
   "instructions/instruct-4.html",
   "instructions/instruct-5.html",
+  "instructions/instruct-6.html",
+  "instructions/instruct-7.html",
   "instructions/instruct-ready.html"
 ];
 
@@ -158,24 +160,26 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
     // "cb" below is the callback to checkGuess, which is itself passed in as
     // callback to interrupt; checkGuess does what it says, and then this
     // callback "cb" finishes the sequence and launches the next trial
-    var cb = function(correct) {
+    var cb = function(scored) {
       var wind = conceal;
       var suffix = setInterval(function() {
         if (_.isEmpty(sequence)) {
           clearInterval(suffix);
-          _.each([rbubble, sbubble], hideBubble);
-          clearDrawer(drawer);
-          setTimeout(function() { doTrial(stim_array); }, 500);
+          setTimeout(function() {
+            _.each([rbubble, sbubble], hideBubble);
+            clearDrawer(drawer);
+            setTimeout(function() { doTrial(stim_array); }, 500);
+          }, 1000);
         } else {
-          var syl = sequence.shift();
-          if (wind === 0) {
-            showOneSyl(sbubble)
-          } else {
-            showOneSyl(sbubble, correct ? "green" : "red");
-            wind = wind - 1;
+          sequence.shift();
+          if (wind === 0) { showOneSyl(sbubble); }
+          else {
+            showOneSyl(sbubble, _.head(scored) ? "green" : "red");
+            wind--;
+            scored.shift();
           }
         }
-      }, 500);
+      }, 250);
       return suffix;
     };
     var inter = 200;
@@ -188,13 +192,8 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
                    psiTurk.recordTrialData(stim);
                    checkGuess(sequence, guess, cb);
                  });
-      }
-      else {
-        var syl = sequence.shift();
-        inter = inter + 1;
-        showOneSyl(sbubble);
-      }
-    }, 500);
+      } else { sequence.shift(); inter++; showOneSyl(sbubble); }
+    }, 250);
     return prefix;
   };
 
@@ -204,35 +203,34 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
         clearInterval(fix);
         stim.guess = [];
         psiTurk.recordTrialData(stim);
-        _.each([rbubble, sbubble], hideBubble);
         setTimeout(function() {
-          doTrial(stim_array);
-        }, 500);
-      } else {
-        var syl = sequence.shift();
-        showOneSyl(sbubble);
-      }
-    }, 500);
+          _.each([rbubble, sbubble], hideBubble);
+          setTimeout(function() { doTrial(stim_array); }, 500);
+        }, 1000);
+      } else { sequence.shift(); showOneSyl(sbubble); }
+    }, 250);
     return fix;
   };
 
   var checkGuess = function(sequence, guess, callback) {
     // callback here finishes the sequence, then starts next trial
-    var correct = sequence.slice(0, conceal);
-    console.log("correct: ");
-    console.log.apply(console, correct);
-    if (_.isEqual(correct, guess)) {
+    var target = sequence.slice(0, conceal);
+    var scored = _.zip(target, guess)
+                  .map(function(p) { return _.isEqual.apply(_, p); });
+    console.log("target: ");
+    console.log.apply(console, target);
+    if (_.isEqual(target, guess)) {
       elephant.transition().duration(300).attr("transform", "translate(0,-50)")
               .transition().duration(300).attr("transform", "translate(0,0)")
               .transition().duration(300).attr("transform", "translate(0,-50)")
               .transition().duration(300).attr("transform", "translate(0,0)")
-              .each("end", function() { callback(true); });
+              .each("end", function() { callback(scored); });
     } else {
       var lefteye = elephant.select("#path3163");
       var righteye = elephant.select("#path3161");
       lefteye
         .transition()
-        .duration(2000)
+        .duration(1800)
         .ease("linear")
         .attrTween("transform", function () {
           return function (t) {
@@ -248,7 +246,7 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
         .attr("transform", "translate(0,0)");
        righteye
          .transition()
-         .duration(2000)
+         .duration(1800)
          .ease("linear")
          .attrTween("transform", function () {
            return function (t) {
@@ -262,7 +260,7 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
          .transition()
          .duration(0)
          .attr("transform", "translate(0,0)")
-         .each("end", function() { callback(false); });
+         .each("end", function() { callback(scored); });
     }
   };
 
@@ -276,9 +274,11 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
       setTimeout(function() {
         if (stim.inter === 200) {
           showBubble(sbubble);
-          drawFreebie(sequence, stim, stim_array);
+          setTimeout(function() {
+            drawFreebie(sequence, stim, stim_array);
+          }, 500);
         } else {
-          console.log("inter:");
+          console.log("inter: ");
           console.log(stim.inter);
           var bar = stim.inter - 199;
           sbubble.select("div")
@@ -286,9 +286,11 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
                  .attr("class", "vline")
                  .style("background-color", "black");
           showBubble(sbubble);
-          drawSequence(sequence, stim, stim_array);
+          setTimeout(function() {
+            drawSequence(sequence, stim, stim_array);
+          }, 500);
         }
-      }, 2000)
+      }, 1000)
     } else {
       exp_callback();
     }
@@ -308,22 +310,7 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
   var drawer   = makeDrawer();
 
   var syl_code;
-  // if (condition === "0") {
-  //   // syl_code = ["wao", "yai", "piu", "shin", "bam", "fei",
-  //   //             "ti", "ra", "ki"];
-  //   syl_code = ["gum", "plox", "tok", "trul",
-  //               "glif",
-  //               "pel",
-  //               "prez", "rix", "aaf"];
-  // } else {
-  //   // syl_code = ["wao", "yai", "piu", "shin", "bam", "bam",
-  //   //             "ti", "ti", "ki", "fei", "ra"];
-  //   syl_code = ["gum", "plox", "tok", "trul",
-  //               "glif", "glif",
-  //               "pel", "pel",
-  //               "prez", "rix", "aaf"]
-  // }
-  syl_code = ["gum", "plox", "tok", "trul", "glif", "pel", "prez", "rix", "aaf"];
+  syl_code = ["daz", "mer", "lev", "jes", "tid", "rud", "nav", "sib", "zor"]
   var conceal  = pred_window;
   var mytrials = stimuli;
 
@@ -402,6 +389,8 @@ var currentview;
 var stimfile = condition === "0" ? "static/data/fsa_grammar.csv"
                                  : "static/data/cfg_grammar.csv";
 // var stimfile = "static/data/fsa_grammar.csv";
+var demo_syl_code;
+demo_syl_code = ["daz", "mer", "lev", "jes", "tid", "rud", "nav", "sib", "zor"]
 
 /************
  * RUN TASK *
@@ -447,7 +436,7 @@ $(window).load(function(){
               warmups.slice(0, warmups.length / 2).concat(
                 fives.slice(0, fives.length / 2)
               )
-            ).slice(0,2);
+            );
 
             var midtrials = _.shuffle(
               warmups.slice(warmups.length / 2).concat(
@@ -457,7 +446,7 @@ $(window).load(function(){
                   function(s) { s.inter = 202; return s; }
                 )
               )
-            ).slice(0,5);
+            );
 
             var toughgroups = _.groupBy(
               splitStims[2],
@@ -479,10 +468,10 @@ $(window).load(function(){
               _.sortBy(splitStims[2], function(trial) { return trial.sequence.length; })
             ).map(function(ht) { return {inter: ht[0], sequence: ht[1].sequence}; });
 
-            var fintrials = _.shuffle(toughies).slice(0,5);
+            var fintrials = _.shuffle(toughies);
 
-            // randstims = pretrials.concat(midtrials, fintrials);
-            randstims = fintrials;
+            randstims = pretrials.concat(midtrials, fintrials);
+            // randstims = fintrials;
             console.log("randstims");
             console.log.apply(console, randstims);
             currentview = new SeqPredict(

@@ -27,9 +27,14 @@
       </div>
     </div>
     <p>
-    The elephant is going to tell you a story in a special language that only
+    The elephant is going to tell you a story in a language that only
     the two of you understand. The language contains nine words:
-    'gum', 'plox', 'tok', 'trul', 'glif', 'pel', 'prez', 'rix', and 'aaf'
+    <span id=wrd></span>
     </p>
   </div>
+  <script>
+    var voc = _.map(demo_syl_code, function(w) { return "'" + w + "'" });
+    d3.select("#wrd")
+      .text(_.initial(voc).join(", ") + " and " + _.last(voc));
+  </script>
 </div>

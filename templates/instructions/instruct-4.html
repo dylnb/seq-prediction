@@ -12,28 +12,39 @@
   </h1>
   <hr>
   <div class="well">
-    <p>
-    After you select the <span id="wrd"></span> that you think will come next
-    in the sentence, the elephant will react. If you get
-    <span id="wrd"></span> right, you'll see the elephant jump up and down;
-    otherwise, you'll see it roll its eyes. Either way, the elephant will finish
-    its own sentence the way it intended all along.
+    <p style="position: absolute;">
+    Once you've interrupted the elephant, you will see nine buttons emerge
+    beneath the two animals, one for each of the nine words in the language.
+    <b>Your goal is to predict the next <span id="wrd"></span> of the
+    sentence.</b> Click <span id="wrd"></span> that you think <span
+    id="wrd"></span> to <span id="wrd"></span> the elphant might say next.
     </p>
-    <p>
-    Click the button below to start a sentence. <b>When you interrupt, select
-    <span id="wrd"></span> to see the elephant react positively.</b> Then
-    click the button again to start the trial over, but this time <b>when you
-    interrupt, select <span id="wrd"></span> to see the elephant react
-    negatively.</b>
+    <p style="color: transparent;">
+    Sometimes, you (the cow) get so excited by the story that <b>you find
+      yourself anticipating what the elephant is going to say</b>. When this
+    happens, you will see a speech bubble emerge from the cow's mouth,
+    indicating that you have just interrupted the elephant mid-sentence.
+    You'll know that an interruption point is coming by the presence of a
+    vertical black bar across the elephant's speech bubble. Click the button
+    below to see what it looks like when you interrupt.
     </p>
+    <div class="row">
+      <div class="col-xs-12 text-center">
+        <button type="button"
+          id="startdemo"
+          class="btn btn-default btn-lg"
+          disabled>
+          See a sentence
+        </button>
+      </div>
+    </div>
     <div id="democontainer" style="overflow: hidden;">
-      <div id="demostage" style="overflow: auto; padding-bottom: 4.6em;">
-        <div class="row">
-          <div class="col-xs-12 text-center">
-            <button type="button" id="startdemo" class="btn btn-default btn-lg">
-              See a sentence
-            </button>
-          </div>
+      <div id="demostage" style="overflow: auto; padding-bottom: 1.6em;">
+        <div class="elephant" style="padding-top: 7em;">
+          <svg width=160 height=160>
+            <image xlink:href="static/images/elephant.svg"
+              width=120 height=120 y=40 />
+          </svg>
         </div>
         <div class="cow" style="padding-top: 7em;">
           <svg width="160" height="160">
@@ -48,14 +59,12 @@
           <!-- <div> </div> -->
         </div>
       </div>
-      <div id="syl-drawer" class="hidden" style="padding-bottom: 1em;">
-      </div>
     </div>
   </div>
   <script type="text/javascript">
-    var wrds = counterbalance === "0" ? 
-      ["word" , "it"  , "'1'", "'2'"] :
-      ["words", "them", "'1', '2', '3'", "'2', '3', '4'"];
+    var wrds = counterbalance === "0" ?
+      ["word"       , "a button"     , "corresponds", "a word"] :
+      ["three words", "three buttons", "correspond" , "words" ];
 
     d3.selectAll("#wrd")
       .data(wrds)
@@ -79,22 +88,14 @@
     var demohidebubble = function(bubble) {
       bubble.classed("hidden", true);
       bubble.selectAll("p").remove();
-      bubble.select("hr").remove();
     };
-    var demoshowdrawer = function(drawer) {
-      drawer.classed("hidden", false);
-    }
-    var demohidedrawer = function(drawer) {
-      drawer.classed("hidden", true);
-      drawer.selectAll("button").remove();
-    }
-    var demointerrupt = function(syls, callback) {
+    var demointerrupt = function(syls) {
       var clicks = 0;
-      var guess = [];
       demoshowbubble(rbubble);
-      d3.select("#demostage")
-        .style("padding-bottom", "1em");
-      demoshowdrawer(demodrawer);
+      var demodrawer = d3.select("#democontainer")
+                         .insert("div", "#followup")
+                         .attr("id", "syl-drawer")
+                         .style("padding-bottom", "1em");
       demodrawer.selectAll("button")
                 .data(syls)
                 .enter()
@@ -105,92 +106,26 @@
                 // .text(function(d) { return demo_syl_code[d]; })
                 .on("click",
                     function(d) {
-                      guess.push(d);
                       demodrawsyl(rbubble, d);
                       if (clicks < conceal - 1) {
                         clicks++;
                       } else {
                         demodrawer.selectAll("button")
                                   .property("disabled", true);
-                        callback(guess);
+                        d3.select(".continue")
+                          .property("disabled", false);
                       }
                     });
+      // d3.select("#followup").classed("hidden", false);
     };
-    var democheck = function(drawer, guess, callback) {
-      // callback here finishes the sequence, then starts next trial
-      if (_.isEqual([0,1,2], guess)) {
-        el.transition().duration(300).attr("transform", "translate(0,-50)")
-          .transition().duration(300).attr("transform", "translate(0,0)")
-          .transition().duration(300).attr("transform", "translate(0,-50)")
-          .transition().duration(300).attr("transform", "translate(0,0)")
-          .each("end", callback);
-      } else {
-        var lefteye = el.select("#path3163");
-        var righteye = el.select("#path3161");
-        lefteye
-          .transition()
-          .duration(2000)
-          .ease("linear")
-          .attrTween("transform", function () {
-            return function (t) {
-              var radius = 6;
-              var t_angle = (4 * Math.PI) * t;
-              var t_x = radius * Math.cos(t_angle);
-              var t_y = radius * Math.sin(t_angle);
-              return "translate(" + (t_x - 6) + "," + (t_y - 2) + ")";
-            };
-          })
-          .transition()
-          .duration(0)
-          .attr("transform", "translate(0,0)");
-         righteye
-           .transition()
-           .duration(2000)
-           .ease("linear")
-           .attrTween("transform", function () {
-             return function (t) {
-               var radius = 6;
-               var t_angle = (4 * Math.PI) * t;
-               var t_x = radius * Math.cos(t_angle + Math.PI);
-               var t_y = radius * Math.sin(t_angle + Math.PI);
-               return "translate(" + (t_x + 6) + "," + (t_y - 2) + ")";
-             };
-           })
-           .transition()
-           .duration(0)
-           .attr("transform", "translate(0,0)")
-           .each("end", function() { done = true; callback(); });
-      }
-    };
+    /*
     var dodemosequence = function(sequence) {
-      var cb = function() {
-        var suffix = setInterval(function() {
-          if (_.isEmpty(sequence)) {
-            clearInterval(suffix);
-            _.each([rbubble, sbubble], demohidebubble);
-            demohidedrawer(demodrawer);
-            d3.select("#demostage")
-              .style("padding-bottom", "4.6em");
-            if (done) {
-              d3.select(".continue").property("disabled", false);
-            } else {
-              start.property("disabled", false);
-            }
-          } else {
-            var syl = sequence.shift();
-            demoshowsyl(sbubble);
-          }
-        }, 500);
-        return suffix;
-      };
       var inter = 200;
       var prefix = setInterval(function() {
         if (203 - inter === 0) {
           clearInterval(prefix);
-          demointerrupt(_.range(demo_syl_code.length),
-                        function(guess) {
-                          democheck(sequence, guess, cb)
-                        });
+          // this callback is demointerrupt
+          demointerrupt(_.range(demo_syl_code.length));
         }
         else {
           var syl = sequence.shift();
@@ -200,54 +135,37 @@
       }, 500);
       return prefix;
     };
-    var el = d3.select("#demostage")
-               .insert("div", ".cow")
-               .attr("class", "elephant")
-               .append("svg")
-               .attr("width", 160)
-               .attr("height", 160)
-               .attr("viewBox", "0 0 360 344")
-               .attr("preserveAspectRatio", "xMinYMin meet")
-               .append("g")
-               .attr("id", "elephant");
-    d3.xml("static/images/elephant.svg", "image/svg+xml", function(xml) {
-      var importedNode = document.importNode(xml.documentElement, true);
-      importedNode.y.baseVal.value = 95;
-      el.node().appendChild(importedNode);
-    });
+    */
+    var el = d3.select(".elephant");
     var cow = d3.select(".cow");
     var sbubble = d3.select(".stim");
         sbubble.insert("div");
     var rbubble = d3.select(".response");
         rbubble.insert("div");
     var conceal = counterbalance === "0" ? 1 : 3;
-    var demo_syl_code = ['gum','plox','tok','trul','glif','pel','prez','rix','aaf'];
-    /*
-    if (condition === "0") {
-      // syl_code = ["wao", "yai", "piu", "shin", "bam", "fei",
-      //             "ti", "ra", "ki"];
-      demo_syl_code = ["gum", "plox", "tok", "trul",
-                       "glif",
-                       "pel",
-                       "prez", "rix", "aaf"];
-    } else {
-      // syl_code = ["wao", "yai", "piu", "shin", "bam", "bam",
-      //             "ti", "ti", "ki", "fei", "ra"];
-      demo_syl_code = ["gum", "plox", "tok", "trul",
-                       "glif", "glif",
-                       "pel", "pel",
-                       "prez", "rix", "aaf"]
+    var example = condition === "0" ? [8,2,3,5,7,8,2]
+                                    : [5,9,4,2,8,6,10];
+    var seq = _.map(example, function(n) { return n - 1; });
+    _.each(seq, _.partial(demodrawsyl, sbubble));
+    sbubble.select("div")
+           .insert("hr", "p:nth-of-type(4)")
+           .attr("class", "vline")
+           .style("background-color", "black");
+    var inter = 200;
+    while (inter < 203) {
+      seq.shift();
+      inter++;
+      demoshowsyl(sbubble);
     }
-    */
-    var demodrawer = d3.select("#syl-drawer");
-    var done = false;
+    demoshowbubble(sbubble);
+    setTimeout(function() { demointerrupt(_.range(demo_syl_code.length)) }, 500);
+    /*
     var start = d3.select("#startdemo");
     start.on("click", function() {
-      demohidebubble(sbubble);
-      demohidebubble(rbubble);
-      demohidedrawer(demodrawer);
       setTimeout(function() {
-        seq = [1,2,3,2,1,2,3];
+        var example = condition === "0" ? [8,2,3,5,7,8,2]
+                                        : [5,9,4,2,8,6,10];
+        var seq = _.map(example, function(n) { return n - 1; });
         _.each(seq, _.partial(demodrawsyl, sbubble));
         sbubble.select("div")
                .insert("hr", "p:nth-of-type(4)")
@@ -255,8 +173,9 @@
                .style("background-color", "black");
         demoshowbubble(sbubble);
         dodemosequence(seq);
-      }, 500)
+      }, 500);
       start.property("disabled", true);
     });
+    */
   </script>
 </div>

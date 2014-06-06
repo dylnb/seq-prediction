@@ -107,15 +107,9 @@
       var prefix = setInterval(function() {
         if (203 - inter === 0) {
           clearInterval(prefix);
-          // this callback is demointerrupt
           demointerrupt(_.range(demo_syl_code.length));
-        }
-        else {
-          var syl = sequence.shift();
-          inter = inter + 1;
-          demoshowsyl(sbubble);
-        }
-      }, 500);
+        } else { sequence.shift(); inter++; demoshowsyl(sbubble); }
+      }, 250);
       return prefix;
     };
     var el = d3.select(".elephant");
@@ -125,35 +119,19 @@
     var rbubble = d3.select(".response");
         rbubble.insert("div");
     var conceal = counterbalance === "0" ? 1 : 3;
-    var demo_syl_code = ['gum','plox','tok','trul','glif','pel','prez','rix','aaf'];
-    /*
-    if (condition === "0") {
-      // syl_code = ["wao", "yai", "piu", "shin", "bam", "fei",
-      //             "ti", "ra", "ki"];
-      demo_syl_code = ["gum", "plox", "tok", "trul",
-                       "glif",
-                       "pel",
-                       "prez", "rix", "aaf"];
-    } else {
-      // syl_code = ["wao", "yai", "piu", "shin", "bam", "bam",
-      //             "ti", "ti", "ki", "fei", "ra"];
-      demo_syl_code = ["gum", "plox", "tok", "trul",
-                       "glif", "glif",
-                       "pel", "pel",
-                       "prez", "rix", "aaf"]
-    }
-    */
     var start = d3.select("#startdemo");
     start.on("click", function() {
       setTimeout(function() {
-        var seq = [1,2,3,2,1,2,3];
+        var example = condition === "0" ? [8,2,3,5,7,8,2]
+                                        : [5,9,4,2,8,6,10];
+        var seq = _.map(example, function(n) { return n - 1; });
         _.each(seq, _.partial(demodrawsyl, sbubble));
         sbubble.select("div")
                .insert("hr", "p:nth-of-type(4)")
                .attr("class", "vline")
                .style("background-color", "black");
         demoshowbubble(sbubble);
-        dodemosequence(seq);
+        setTimeout(function() { dodemosequence(seq); }, 500);
       }, 500);
       start.property("disabled", true);
     });
