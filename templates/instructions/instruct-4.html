@@ -118,24 +118,6 @@
                     });
       // d3.select("#followup").classed("hidden", false);
     };
-    /*
-    var dodemosequence = function(sequence) {
-      var inter = 200;
-      var prefix = setInterval(function() {
-        if (203 - inter === 0) {
-          clearInterval(prefix);
-          // this callback is demointerrupt
-          demointerrupt(_.range(demo_syl_code.length));
-        }
-        else {
-          var syl = sequence.shift();
-          inter = inter + 1;
-          demoshowsyl(sbubble);
-        }
-      }, 500);
-      return prefix;
-    };
-    */
     var el = d3.select(".elephant");
     var cow = d3.select(".cow");
     var sbubble = d3.select(".stim");
@@ -144,7 +126,7 @@
         rbubble.insert("div");
     var conceal = counterbalance === "0" ? 1 : 3;
     var example = condition === "0" ? [8,2,3,5,7,8,2]
-                                    : [5,9,4,2,8,6,10];
+                                    : [5,8,4,2,7,6,9];
     var seq = _.map(example, function(n) { return n - 1; });
     _.each(seq, _.partial(demodrawsyl, sbubble));
     sbubble.select("div")
@@ -159,23 +141,5 @@
     }
     demoshowbubble(sbubble);
     setTimeout(function() { demointerrupt(_.range(demo_syl_code.length)) }, 500);
-    /*
-    var start = d3.select("#startdemo");
-    start.on("click", function() {
-      setTimeout(function() {
-        var example = condition === "0" ? [8,2,3,5,7,8,2]
-                                        : [5,9,4,2,8,6,10];
-        var seq = _.map(example, function(n) { return n - 1; });
-        _.each(seq, _.partial(demodrawsyl, sbubble));
-        sbubble.select("div")
-               .insert("hr", "p:nth-of-type(4)")
-               .attr("class", "vline")
-               .style("background-color", "black");
-        demoshowbubble(sbubble);
-        dodemosequence(seq);
-      }, 500);
-      start.property("disabled", true);
-    });
-    */
   </script>
 </div>

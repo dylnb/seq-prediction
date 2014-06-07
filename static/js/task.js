@@ -10,14 +10,15 @@ var psiTurk = PsiTurk(uniqueId, adServerLoc);
 // All pages loaded in course of experiment
 var pages = [
   "instructions/instruct-1.html",
-  "instructions/instruct-2.html",
-  "instructions/instruct-3.html",
-  "instructions/instruct-4.html",
-  "instructions/instruct-5.html",
-  "instructions/instruct-6.html",
-  "instructions/instruct-7.html",
+  // "instructions/instruct-2.html",
+  // "instructions/instruct-3.html",
+  // "instructions/instruct-4.html",
+  // "instructions/instruct-5.html",
+  // "instructions/instruct-6.html",
+  // "instructions/instruct-7.html",
   "instructions/instruct-ready.html",
   "teststage.html",
+  "breather.html",
   "postquestionnaire.html"
 ];
 
@@ -25,12 +26,12 @@ psiTurk.preloadPages(pages);
 
 var instructionPages = [ // demo instructions
   "instructions/instruct-1.html",
-  "instructions/instruct-2.html",
-  "instructions/instruct-3.html",
-  "instructions/instruct-4.html",
-  "instructions/instruct-5.html",
-  "instructions/instruct-6.html",
-  "instructions/instruct-7.html",
+  // "instructions/instruct-2.html",
+  // "instructions/instruct-3.html",
+  // "instructions/instruct-4.html",
+  // "instructions/instruct-5.html",
+  // "instructions/instruct-6.html",
+  // "instructions/instruct-7.html",
   "instructions/instruct-ready.html"
 ];
 
@@ -189,6 +190,7 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
         interrupt(_.range(syl_code.length),
                  function(guess) {
                    stim.guess = guess;
+                   stim.target = sequence.slice(0, conceal);
                    psiTurk.recordTrialData(stim);
                    checkGuess(sequence, guess, cb);
                  });
@@ -269,7 +271,7 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
     console.log.apply(console, stim_array);
     if (stim_array.length > 0) {
       var stim = stim_array.shift();
-      var sequence = stim.sequence;
+      var sequence = stim.sequence.slice();
       _.each(sequence, _.partial(drawSyl, sbubble));
       setTimeout(function() {
         if (stim.inter === 200) {
@@ -337,25 +339,22 @@ var Questionnaire = function() {
                       ].join(" ");
 
   var record_responses = function() {
-
     psiTurk.recordTrialData({'phase':'postquestionnaire', 'status':'submit'});
-
     $('textarea').each( function(i, val) {
       psiTurk.recordUnstructuredData(this.id, this.value);
     });
     $('select').each( function(i, val) {
       psiTurk.recordUnstructuredData(this.id, this.value);		
     });
-
   };
 
   var prompt_resubmit = function() {
-    replaceBody(error_message);
+    $('body').html(error_message);
     $("#resubmit").click(resubmit);
   };
 
   var resubmit = function() {
-    replaceBody("<h1>Trying to resubmit...</h1>");
+    $('body').html("<h1>Trying to resubmit...</h1>");
     reprompt = setTimeout(prompt_resubmit, 10000);
 		
 		psiTurk.saveData({
@@ -470,15 +469,83 @@ $(window).load(function(){
 
             var fintrials = _.shuffle(toughies);
 
-            randstims = pretrials.concat(midtrials, fintrials);
-            // randstims = fintrials;
+            // randstims = pretrials.concat(midtrials, fintrials);
+            randstims = fintrials.slice(0,4);
+            onestims = randstims.slice(0, randstims.length / 2);
+            twostims = randstims.slice(randstims.length / 2);
             console.log("randstims");
             console.log.apply(console, randstims);
             currentview = new SeqPredict(
-              randstims, // trial data
+              onestims, // trial data
               counterbalance === "0" ? 1 : 3, // prediction window
               false, // real experiment; not practice
-              function() { currentview = new Questionnaire(); } // post-exp
+              function() {
+                psiTurk.saveData({
+                  success: function() {
+                    psiTurk.showPage("breather.html");
+                    $("#keepgoing").click(function() {
+                      currentview = new SeqPredict(
+                        twostims,
+                        counterbalance === "0" ? 1 : 3,
+                        false,
+                        function() {
+                          psiTurk.saveData({
+                            success: function() {
+                              currentview = new Questionnaire();
+                            }, // post-exp
+                            error: function() {
+                              var error_message = [ "<h1>Oops!</h1>",
+                                "<p>Something went wrong submitting your HIT.",
+                                "This might happen if you lose your internet connection.",
+                                "Press the button to resubmit.</p>",
+                                "<button id='keepgoing'>Continue</button>"
+                                                  ].join(" ");
+                              var prompt_resubmit = function() {
+                                $('body').html(error_message);
+                                $("#keepgoing").click(resubmit);
+                              };
+                              var resubmit = function() {
+                                $('body').html("<h1>Attempting to continue...</h1>");
+                                reprompt = setTimeout(prompt_resubmit, 10000);
+                                psiTurk.saveData({
+                                  success: function() {
+                                    clearInterval(reprompt); 
+                                    currentview = new Questionnaire();
+                                  }, 
+                                  error: prompt_resubmit
+                                });
+                              };
+                            }
+                          });
+                        }
+                      );
+                    });
+                  },
+                  error: function() {
+                    var error_message = [ "<h1>Oops!</h1>",
+                      "<p>Something went wrong submitting your HIT.",
+                      "This might happen if you lose your internet connection.",
+                      "Press the button to resubmit.</p>",
+                      "<button id='keepgoing'>Continue</button>"
+                                        ].join(" ");
+                    var prompt_resubmit = function() {
+                      $('body').html(error_message);
+                      $("#keepgoing").click(resubmit);
+                    };
+                    var resubmit = function() {
+                      $('body').html("<h1>Attempting to continue...</h1>");
+                      reprompt = setTimeout(prompt_resubmit, 10000);
+                      psiTurk.saveData({
+                        success: function() {
+                          clearInterval(reprompt); 
+                          currentview = new Questionnaire();
+                        }, 
+                        error: prompt_resubmit
+                      });
+                    };
+                  }
+                });
+              }
             );
           }, 3000);
         });

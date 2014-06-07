@@ -85,7 +85,7 @@
         sbubble.insert("div");
     var start = d3.select("#startdemo");
     var examples = condition === "0" ? [[9,5,1,3,6], [8,1,3], [8,1,3,9,5,2]]
-                                     : [[6,9,3,5,9], [6,9,2], [6,9,3,1,8,6]]
+                                     : [[6,8,3,5,8], [6,8,2], [6,8,3,1,7,6]]
     start.on("click", function() {
       dodemo(_.map(examples, function(l) {
         return _.map(l, function(n) { return n - 1; });

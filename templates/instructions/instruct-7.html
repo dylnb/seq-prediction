@@ -57,10 +57,17 @@
         console.log("practicestims");
         console.log.apply(console, practicestims);
         currentview = new SeqPredict(
-          _.shuffle(practicestims).slice(0,8), // practice data
+          practicestims, // practice data
           counterbalance === "0" ? 1 : 3, // prediction window
           true, // just practice
           function() {
+            d3.select("#stage")
+              .append("div")
+              .classed("text-center", true)
+              .classed("well", true)
+              .append("p")
+              .style("font-size", "13pt")
+              .text("Good work. Click next to advance to the next page.")
             // d3.selectAll(".hidden").classed("hidden", false); // reveal nav
             d3.select(".continue").property("disabled", false);
           });

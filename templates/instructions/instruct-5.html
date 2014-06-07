@@ -60,7 +60,7 @@
       condition === "0" ? 
         ["words", "them", "'tid', 'nav', 'sib'", "'daz', 'nav', 'sib'"]
                         :
-        ["words", "them", "'mer', 'sib', 'rud'", "'daz', 'sib', 'rud'"];
+        ["words", "them", "'mer', 'nav', 'rud'", "'daz', 'nav', 'rud'"];
 
     d3.selectAll("#wrd")
       .data(wrds)
@@ -181,13 +181,15 @@
         var suffix = setInterval(function() {
           if (_.isEmpty(sequence)) {
             clearInterval(suffix);
-            _.each([rbubble, sbubble], demohidebubble);
-            demohidedrawer(demodrawer);
-            d3.select("#demostage")
-              .style("padding-bottom", "4.6em");
-            if (done % 15 === 0) { // seen both positive and negative responses
-              d3.select(".continue").property("disabled", false);
-            } else { start.property("disabled", false); }
+            setTimeout(function() {
+              _.each([rbubble, sbubble], demohidebubble);
+              demohidedrawer(demodrawer);
+              d3.select("#demostage")
+                .style("padding-bottom", "4.6em");
+              if (done % 15 === 0) { // seen both positive and negative responses
+                d3.select(".continue").property("disabled", false);
+              } else { start.property("disabled", false); }
+            }, 1000);
           } else {
             sequence.shift();
             if (wind === 0) { demoshowsyl(sbubble); }
@@ -240,7 +242,7 @@
       demohidedrawer(demodrawer);
       setTimeout(function() {
         var example = condition === "0" ? [8,2,3,5,7,8,2]
-                                        : [5,9,4,2,8,6,10];
+                                        : [5,8,4,2,7,6,9];
         var seq = _.map(example, function(n) { return n - 1; });
         _.each(seq, _.partial(demodrawsyl, sbubble));
         sbubble.select("div")

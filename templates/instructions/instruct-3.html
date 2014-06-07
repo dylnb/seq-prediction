@@ -74,32 +74,6 @@
     var demointerrupt = function(syls) {
       var clicks = 0;
       demoshowbubble(rbubble);
-      /*
-      var demodrawer = d3.select("#democontainer")
-                         .insert("div", "#followup")
-                         .attr("id", "syl-drawer")
-                         .style("padding-bottom", "1em");
-      demodrawer.selectAll("button")
-                .data(syls)
-                .enter()
-                .insert("button")
-                .attr("type", "button")
-                .attr("class", "btn btn-default btn-lg")
-                .text(function(d) { return demo_syl_code[d]; })
-                .on("click",
-                    function(d) {
-                      demodrawsyl(rbubble, d);
-                      if (clicks < conceal - 1) {
-                        clicks++;
-                      } else {
-                        demodrawer.selectAll("button")
-                                  .property("disabled", true);
-                        d3.select(".continue")
-                          .property("disabled", false);
-                      }
-                    });
-      d3.select("#followup").classed("hidden", false);
-      */
       d3.select(".continue").property("disabled", false);
     };
     var dodemosequence = function(sequence) {
@@ -123,7 +97,7 @@
     start.on("click", function() {
       setTimeout(function() {
         var example = condition === "0" ? [8,2,3,5,7,8,2]
-                                        : [5,9,4,2,8,6,10];
+                                        : [5,8,4,2,7,6,9];
         var seq = _.map(example, function(n) { return n - 1; });
         _.each(seq, _.partial(demodrawsyl, sbubble));
         sbubble.select("div")
