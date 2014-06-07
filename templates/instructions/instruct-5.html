@@ -125,12 +125,12 @@
       var target = sequence.slice(0, conceal);
       var scored = _.zip(target, guess)
                     .map(function(p) { return _.isEqual.apply(_, p); });
-      console.log("target: ");
-      console.log.apply(console, target);
-      console.log("guess: ");
-      console.log.apply(console, guess);
-      console.log("scored: ");
-      console.log.apply(console, scored);
+      // console.log("target: ");
+      // console.log.apply(console, target);
+      // console.log("guess: ");
+      // console.log.apply(console, guess);
+      // console.log("scored: ");
+      // console.log.apply(console, scored);
       if (_.isEqual(target, guess)) {
         el.transition().duration(300).attr("transform", "translate(0,-50)")
           .transition().duration(300).attr("transform", "translate(0,0)")

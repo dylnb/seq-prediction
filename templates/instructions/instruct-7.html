@@ -20,13 +20,13 @@
     var stims = [];
     queue()
       .defer(d3.csv, practicestimfile, function(d) { // first load data
-        console.log("starting deferral");
+        // console.log("starting deferral");
         var codes = _.map(d.Sequence.split(" "),
                           function(code) { return (+code - 1); });
         stims.push({inter: 200, sequence: codes});
       })
       .await(function(error) { // then begin practice task
-        console.log("starting awaital");
+        // console.log("starting awaital");
 
         var pgroups = _.groupBy(
           stims,
@@ -54,8 +54,8 @@
           _.sortBy(stims, function(trial) { return trial.sequence.length; })
         ).map(function(ht) { return {inter: ht[0], sequence: ht[1].sequence}; });
         
-        console.log("practicestims");
-        console.log.apply(console, practicestims);
+        // console.log("practicestims");
+        // console.log.apply(console, practicestims);
         currentview = new SeqPredict(
           practicestims, // practice data
           counterbalance === "0" ? 1 : 3, // prediction window

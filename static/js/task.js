@@ -10,12 +10,12 @@ var psiTurk = PsiTurk(uniqueId, adServerLoc);
 // All pages loaded in course of experiment
 var pages = [
   "instructions/instruct-1.html",
-  // "instructions/instruct-2.html",
-  // "instructions/instruct-3.html",
-  // "instructions/instruct-4.html",
-  // "instructions/instruct-5.html",
-  // "instructions/instruct-6.html",
-  // "instructions/instruct-7.html",
+  "instructions/instruct-2.html",
+  "instructions/instruct-3.html",
+  "instructions/instruct-4.html",
+  "instructions/instruct-5.html",
+  "instructions/instruct-6.html",
+  "instructions/instruct-7.html",
   "instructions/instruct-ready.html",
   "teststage.html",
   "breather.html",
@@ -26,12 +26,12 @@ psiTurk.preloadPages(pages);
 
 var instructionPages = [ // demo instructions
   "instructions/instruct-1.html",
-  // "instructions/instruct-2.html",
-  // "instructions/instruct-3.html",
-  // "instructions/instruct-4.html",
-  // "instructions/instruct-5.html",
-  // "instructions/instruct-6.html",
-  // "instructions/instruct-7.html",
+  "instructions/instruct-2.html",
+  "instructions/instruct-3.html",
+  "instructions/instruct-4.html",
+  "instructions/instruct-5.html",
+  "instructions/instruct-6.html",
+  "instructions/instruct-7.html",
   "instructions/instruct-ready.html"
 ];
 
@@ -146,8 +146,8 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
                 if (clicks < conceal - 1) {
                   clicks++;
                 } else {
-                  console.log("guess: ");
-                  console.log.apply(console, guess);
+                  // console.log("guess: ");
+                  // console.log.apply(console, guess);
                   drawer.selectAll("button")
                         .property("disabled", true);
                   // check the guess, finish the sequence, launch next trial
@@ -219,8 +219,8 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
     var target = sequence.slice(0, conceal);
     var scored = _.zip(target, guess)
                   .map(function(p) { return _.isEqual.apply(_, p); });
-    console.log("target: ");
-    console.log.apply(console, target);
+    // console.log("target: ");
+    // console.log.apply(console, target);
     if (_.isEqual(target, guess)) {
       elephant.transition().duration(300).attr("transform", "translate(0,-50)")
               .transition().duration(300).attr("transform", "translate(0,0)")
@@ -267,8 +267,8 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
   };
 
   var doTrial = function(stim_array) {
-    console.log("stim_array: ");
-    console.log.apply(console, stim_array);
+    // console.log("stim_array: ");
+    // console.log.apply(console, stim_array);
     if (stim_array.length > 0) {
       var stim = stim_array.shift();
       var sequence = stim.sequence.slice();
@@ -280,8 +280,8 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
             drawFreebie(sequence, stim, stim_array);
           }, 500);
         } else {
-          console.log("inter: ");
-          console.log(stim.inter);
+          // console.log("inter: ");
+          // console.log(stim.inter);
           var bar = stim.inter - 199;
           sbubble.select("div")
                  .insert("hr", "p:nth-of-type(" + bar + ")")
@@ -300,7 +300,7 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
 
   if (! practice_run) {
     // it's the real experiment; clear the window and prep the test stage
-    console.log("showing teststage");
+    // console.log("showing teststage");
     psiTurk.showPage("teststage.html");
   }
 
@@ -317,8 +317,8 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
   var mytrials = stimuli;
 
   setTimeout(function() {
-    console.log("conceal: " + conceal);
-    console.log.apply(console, mytrials);
+    // console.log("conceal: " + conceal);
+    // console.log.apply(console, mytrials);
     doTrial(mytrials);
   }, 1000);
 
@@ -402,7 +402,7 @@ $(window).load(function(){
       var randstims = [];
       queue()
         .defer(d3.csv, stimfile, function(d) { // first load the data
-          console.log("starting deferral");
+          // console.log("starting deferral");
           // // first number identifies interruption point
           // var inter = _.head(d.Sequence.split(" "));
           // // next numbers code for a particular sequence of syllables
@@ -420,7 +420,7 @@ $(window).load(function(){
         })
         .await(function(error) { // then wait 3s, randomize data, run task
           setTimeout(function() {
-            console.log("starting awaital");
+            // console.log("starting awaital");
             var splitStims = _.values(_.groupBy(stims, function(trial) {
               var l = trial.sequence.length;
               if (l < 5) { return "L"; }
@@ -469,12 +469,12 @@ $(window).load(function(){
 
             var fintrials = _.shuffle(toughies);
 
-            // randstims = pretrials.concat(midtrials, fintrials);
-            randstims = fintrials.slice(0,4);
-            onestims = randstims.slice(0, randstims.length / 2);
-            twostims = randstims.slice(randstims.length / 2);
-            console.log("randstims");
-            console.log.apply(console, randstims);
+            randstims = pretrials.concat(midtrials, fintrials);
+            // randstims = fintrials.slice(0,4);
+            var onestims = randstims.slice(0, randstims.length / 2);
+            var twostims = randstims.slice(randstims.length / 2);
+            // console.log("randstims");
+            // console.log.apply(console, randstims);
             currentview = new SeqPredict(
               onestims, // trial data
               counterbalance === "0" ? 1 : 3, // prediction window
