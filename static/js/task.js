@@ -204,6 +204,7 @@ var SeqPredict = function(stimuli, pred_window,  practice_run, exp_callback) {
       if (_.isEmpty(sequence)) {
         clearInterval(fix);
         stim.guess = [];
+        stim.taget = [];
         psiTurk.recordTrialData(stim);
         setTimeout(function() {
           _.each([rbubble, sbubble], hideBubble);

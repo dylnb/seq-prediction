@@ -141,21 +141,21 @@ downshift = map (\s' -> if read s' == (6 :: Int) || read s' == (7 :: Int)
                                  then show (read s' - (2 :: Int))
                                  else s')
 
--- main = do
---   let sampsizes = [4, 16, 12, 15, 23, 30, 34, 26, 17, 8, 5]
---   xss <- zipWithM pickN sampsizes (grp fsastims)
---   let stims = concatMap (map unwords) xss
---   writeFile "fsa_grammar.csv" $ unlines ("Sequence":stims)
+main = do
+  let sampsizes = [4, 16, 17, 15, 23, 30, 34, 26, 17, 13]
+  xss <- zipWithM pickN sampsizes (grp fsastims)
+  let stims = concatMap (map unwords) xss
+  writeFile "fsa_grammar.csv" $ unlines ("Sequence":stims)
 
 -- main = do
 --   let stims = map unwords practicestims
 --   writeFile "practice_grammar.csv" $ unlines ("Sequence":stims)
 
-main = do
-  cfg <- readFile "cfg_sixeight-less.csv"
-  let stims = tail . lines $ cfg
-  let cfgstims = map (unwords  . downshift . words) stims
-  writeFile "cfg_grammar.csv" $ unlines ("Sequence":cfgstims)
+-- main = do
+--   cfg <- readFile "cfg_sixeight-less.csv"
+--   let stims = tail . lines $ cfg
+--   let cfgstims = map (unwords  . downshift . words) stims
+--   writeFile "cfg_grammar.csv" $ unlines ("Sequence":cfgstims)
 
 -- main = do
 --   cfg <- readFile "cfg_ds.csv"
@@ -185,7 +185,7 @@ main = do
 --   cfg <- readFile "cfg_rohr_LC.csv"
 --   let stims = tail . lines $ cfg
 --   cfgstims <- mapM replaceNNs stims
---   writeFile "cfg_nns.csv" $ unlines ("Sequence":cfgstims)
+--   writeFile "cfg_nns.csv" $ unlines ("Sequence":cfgstims) 
 
 -- main = do
 --   cfg <- readFile "cfg_grammar.csv"

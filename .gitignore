@@ -2,6 +2,9 @@
 config.txt
 custom.py
 participants.db
+eventdata.csv
+trialdata.csv
+questiondata.csv
 
 # OS generated files #
 ######################
