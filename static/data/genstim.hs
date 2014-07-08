@@ -141,11 +141,11 @@ downshift = map (\s' -> if read s' == (6 :: Int) || read s' == (7 :: Int)
                                  then show (read s' - (2 :: Int))
                                  else s')
 
-main = do
-  let sampsizes = [4, 16, 17, 15, 23, 30, 34, 26, 17, 13]
-  xss <- zipWithM pickN sampsizes (grp fsastims)
-  let stims = concatMap (map unwords) xss
-  writeFile "fsa_grammar.csv" $ unlines ("Sequence":stims)
+-- main = do
+--   let sampsizes = [4, 16, 17, 15, 23, 30, 34, 26, 17, 13]
+--   xss <- zipWithM pickN sampsizes (grp fsastims)
+--   let stims = concatMap (map unwords) xss
+--   writeFile "fsa_grammar.csv" $ unlines ("Sequence":stims)
 
 -- main = do
 --   let stims = map unwords practicestims
@@ -187,14 +187,14 @@ main = do
 --   cfgstims <- mapM replaceNNs stims
 --   writeFile "cfg_nns.csv" $ unlines ("Sequence":cfgstims) 
 
--- main = do
---   cfg <- readFile "cfg_grammar.csv"
---   let cfgstims = org $ tail . lines $ cfg
---   let fsadist = map (\xss -> (length (head xss), fromIntegral (length xss))) $
---                     grp fsastims
---   let cfgdist = map (\xss -> (length (head xss), fromIntegral (length xss))) $
---                     grp cfgstims
---   print $ fsadist
---   print $ cfgdist
---   print $ map (\(i,f) -> (i, roundToStr 2 $ f / fromIntegral (length fsastims))) fsadist 
---   print $ map (\(i,f) -> (i, roundToStr 2 $ f / fromIntegral (length cfgstims))) cfgdist
+main = do
+  cfg <- readFile "cfg_grammar.csv"
+  let cfgstims = org $ tail . lines $ cfg
+  let fsadist = map (\xss -> (length (head xss), fromIntegral (length xss))) $
+                    grp fsastims
+  let cfgdist = map (\xss -> (length (head xss), fromIntegral (length xss))) $
+                    grp cfgstims
+  print $ fsadist
+  print $ cfgdist
+  print $ map (\(i,f) -> (i, roundToStr 2 $ f / fromIntegral (length fsastims))) fsadist 
+  print $ map (\(i,f) -> (i, roundToStr 2 $ f / fromIntegral (length cfgstims))) cfgdist
