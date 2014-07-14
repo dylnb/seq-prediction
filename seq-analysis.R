@@ -451,3 +451,15 @@ t_accs2 <- data_outs[ttmp2, mult="first"][,!c(trial_vars, "stage", "stage4"), wi
 
 ### Compare n-gram models for FSA ###
 #####################################
+fsa <- read.csv(file="static/data/fsa_grammar.csv", header=TRUE)
+fsa$Sequence <- as.character(fsa$Sequence)
+fsa <- as.data.frame(sapply(fsa, function(x){paste("START", x, "STOP")},
+                            simplify=TRUE),
+                     stringsAsFactors=FALSE)
+fsa_ngs <- data.table(trialid=rep(seq_along(fsa$Sequence),
+                                  times=sapply(strsplit(fsa$Sequence, " "),
+                                               length)),
+                      n1=do.call(c, strsplit(fsa$Sequence, " ")))
+fsa_ngs[, `:=`(n2=c(n1[-1], NA), n3=c(n1[-(1:2)], NA, NA)), by=trialid]
+setkeyv(fsa_ngs, c("n1", "n2"))
+fsa_ngs <- fsa_ngs[!CJ(c("STOP","START"), unique(n2))][!CJ(unique(n1), "STOP")]
